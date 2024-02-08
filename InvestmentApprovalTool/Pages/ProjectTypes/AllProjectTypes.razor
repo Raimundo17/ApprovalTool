@@ -1,0 +1,33 @@
+﻿@page "/AllProjectTypes"
+
+<div class="row">
+    <div class="col-10"><h3>Project Type Management</h3></div>
+    <div class="col-2">
+        <a href='AddProjectType' class="btn btn-primary" role="button">
+            <i class="fas fa-user-plus"></i>
+            Add a new Project Type
+        </a>
+    </div>
+</div>
+
+<BackofficeTable EntityList="@projectTypeList"></BackofficeTable>
+
+@code {
+    protected List<ProjectType> projectTypeList = new();
+    protected ProjectType projectType = new();
+    [CascadingParameter]
+    protected User currentUser { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (currentUser.IsAdmin == true && currentUser.isActive == true)
+        {
+            projectTypeList = await projecttypeService.GetAll();
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+    }
+}

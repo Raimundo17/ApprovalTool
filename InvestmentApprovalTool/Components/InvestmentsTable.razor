@@ -1,0 +1,228 @@
+﻿<Table TableItem="@Data.Investments" Items="investmentsList" TableRowClass="@(x => x.pending)" PageSize="15">
+    <Column TableItem="Data.Investments" Title="Issue Date" Field="@(x => x.IssueDate)" Sortable="true" Align="Align.Center" Filterable="true" Width="auto" />
+    <Column TableItem="Data.Investments" Title="AR Number" Field="@(x => x.ArNumber)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+    <Column TableItem="Data.Investments" Title="IR/DR Number" Field="@(x => x.IR_DRNumber)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+    <Column TableItem="Data.Investments" Title="Project Type" Field="@(x => x.ProjectType.Description)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+    <Column TableItem="Data.Investments" Title="Production Concept Change" Field="@(x => x.productionConceptChange)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+    <Column TableItem="Data.Investments" Title="Project Title" Field="@(x => x.ProjectTitle_DisposalDescription)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+    <Column TableItem="Data.Investments" Title="Requester" Field="@(x => x.Requester.Name)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+    <Column TableItem="Data.Investments" Title="Country" Field="@(x => x.Country.CountryName)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+    <Column TableItem="Data.Investments" Title="Plant" Field="@(x => x.Plant.PlantName)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+    <Column TableItem="Data.Investments" Title="IR/DR (€)" Field="@(x => x.IRValueEuro)" Sortable="true" Format="N0" Filterable="true" Align="Align.Right" Width="auto" />
+    <Column TableItem="Data.Investments" Title="IR/DR ($)" Field="@(x => x.IRValueDollar)" Sortable="true" Format="N0" Filterable="true" Align="Align.Right" Width="auto" />
+    <Column TableItem="Data.Investments" Title="Doc Type" Field="@(x => x.DocType.Description)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+    <Column TableItem="Data.Investments" Title="Comments" Field="@(x => x.Comments)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+    <Column TableItem="Data.Investments" Title="Status" Field="@(x => x.Status.StatusDesignation)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+    <Column TableItem="Data.Investments" Title="Process Level" Field="@(x => x.ProcessLevel.Description)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+    <Column TableItem="Data.Investments" Context="_context" Title="Manage" Width="10%">
+        <Template>
+            @{
+                if (isRequestor | currentUser.RoleId == 7 | currentUser.RoleId == 9 | currentUser.RoleId == 12)
+                {
+                    <a href='/investments/edit/@_context.Id' class="btn btn-outline-success" role="button">
+                        Edit
+                    </a>
+                }
+                if (isRequestor)
+                {
+                    <a href='/investments/delete/@_context.Id' class="btn btn-outline-danger" role="button">
+                        Delete
+                    </a>
+                }
+            }
+        </Template>
+    </Column>
+    <Column TableItem="Data.Investments" Context="_context" Title="Preview" Width="10%">
+        <Template>
+            @{
+                var parameters = new ModalParameters
+            {
+            { nameof(_context.Id), _context.Id },
+            {   nameof(currentUser.NetId), currentUser.NetId }
+            };
+
+                var options = new ModalOptions()
+                    {
+                        Size = Blazored.Modal.ModalSize.Custom,
+                        SizeCustomClass = "1000px"
+                    };
+
+
+                <a @onclick="@(()=>modal.Show<Pages.Investments.InvestmentsDetail>(currentUser.NetId,parameters,options))" class="btn btn-outline-info">Investment Detail</a>
+            }
+
+        </Template>
+    </Column>
+    @if (currentUrl != null)
+    {
+        <DetailTemplate TableItem="Data.Investments" Context="_context">
+            @{
+                var investmentHistoryForCurrentInvestment = investmentshistoryList
+                .Where(item => item.InvestmentsId == _context.Id)
+                .ToList();
+
+                foreach (var item in investmentHistoryForCurrentInvestment)
+                {
+                    if (item.ProcesslevelDate3 != null)
+                    {
+                        <strong>@item.Approval3role</strong>
+                        <br>
+                        @item.Approval3
+                        <br>
+                        @item.ProcesslevelDate3
+                        <br>
+                    }
+
+                    if (item.ProcesslevelDate4 != null)
+                    {
+                        <strong>@item.Approval4role</strong>
+                        <br>
+                        @item.Approval4
+                        <br>
+                        @item.ProcesslevelDate4
+                        <br>
+                    }
+
+                    if (item.ProcesslevelDate5 != null)
+                    {
+                        <strong>@item.Approval5role</strong>
+                        <br>
+                        @item.Approval5
+                        <br>
+                        @item.ProcesslevelDate5
+                        <br>
+                    }
+
+                    if (item.ProcesslevelDate6 != null)
+                    {
+                        <strong>@item.Approval6role</strong>
+                        <br>
+                        @item.Approval6
+                        <br>
+                        @item.ProcesslevelDate6
+                        <br>
+                    }
+
+                    if (item.ProcesslevelDate7 != null)
+                    {
+                        <strong>@item.Approval7role</strong>
+                        <br>
+                        @item.Approval7
+                        <br>
+                        @item.ProcesslevelDate7
+                        <br>
+                    }
+
+                    if (item.ProcesslevelDate8 != null)
+                    {
+                        <strong>@item.Approval8role</strong>
+                        <br>
+                        @item.Approval8
+                        <br>
+                        @item.ProcesslevelDate8
+                        <br>
+                    }
+
+                    if (item.ProcesslevelDate9 != null)
+                    {
+                        <strong>@item.Approval9role</strong>
+                        <br>
+                        @item.Approval9
+                        <br>
+                        @item.ProcesslevelDate9
+                        <br>
+                    }
+
+                    if (item.ProcesslevelDate10 != null)
+                    {
+                        <strong>@item.Approval10role</strong>
+                        <br>
+                        @item.Approval10
+                        <br>
+                        @item.ProcesslevelDate10
+                        <br>
+                    }
+
+                    if (item.ProcesslevelDate11 != null)
+                    {
+                        <strong>@item.Approval11role</strong>
+                        <br>
+                        @item.Approval11
+                        <br>
+                        @item.ProcesslevelDate11
+                        <br>
+                    }
+
+                    if (item.ProcesslevelDate12 != null)
+                    {
+                        <strong>@item.Approval12role</strong>
+                        <br>
+                        @item.Approval12
+                        <br>
+                        @item.ProcesslevelDate12
+                        <br>
+                    }
+
+                    if (item.ProcesslevelDate13 != null)
+                    {
+                        <strong>@item.Approval13role</strong>
+                        <br>
+                        @item.Approval13
+                        <br>
+                        @item.ProcesslevelDate13
+                        <br>
+                    }
+
+                    if (item.ProcesslevelDate14 != null)
+                    {
+                        <strong>@item.Approval14role</strong>
+                        <br>
+                        @item.Approval14
+                        <br>
+                        @item.ProcesslevelDate14
+                        <br>
+                    }
+
+                    if (item.ProcesslevelDate15 != null)
+                    {
+                        <strong>@item.Approval15role</strong>
+                        <br>
+                        @item.Approval15
+                        <br>
+                        @item.ProcesslevelDate15
+                        <br>
+                    }
+                }
+            }
+        </DetailTemplate>
+    }
+    <Pager AlwaysShow="true" ShowPageSizes="true" ShowTotalCount="true" ShowPageNumber="true"></Pager>
+</Table>
+
+@code {
+        [Parameter] public List<Data.Investments> investmentsList { get; set; } = new();
+        [Parameter] public Data.Investments investments { get; set; } = new();
+        [CascadingParameter] public User? currentUser { get; set; }
+    protected bool isRequestor { get { return currentUser.RoleId.Equals(2); } }
+    [Parameter] public List<Data.InvestmentsHistory> investmentshistoryList { get; set; } = new();
+    [Parameter] public string currentUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        foreach (var investments in investmentsList)
+        {
+            if (investments.StatusId == 5)
+            {
+                investments.pending = "table-success";
+            }
+            else if (investments.StatusId == 2)
+            {
+                investments.pending = "table-warning";
+            }
+            else if (investments.StatusId == 3 | investments.StatusId == 4)
+            {
+                investments.pending = "table-danger";
+            }
+        }
+    }
+}

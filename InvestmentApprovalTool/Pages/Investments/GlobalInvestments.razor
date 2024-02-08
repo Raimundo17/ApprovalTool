@@ -1,0 +1,37 @@
+﻿@page "/GlobalInvestments"
+
+<div class="row">
+    <div class="col-10"><h3>All Investments</h3></div>
+</div>
+<br />
+
+@if (investmentsList.Count != 0)
+{
+    <InvestmentsTable investmentsList="@investmentsList" investmentshistoryList="@investmentshistoryList" currentUrl="@currentUrl"></InvestmentsTable>
+}
+else
+{
+    <div><h3>There are no investments</h3></div>
+}
+
+
+@code {
+    protected List<Investments> investmentsList = new();
+    [CascadingParameter]
+    protected User currentUser { get; set; }
+    public string currentUrl { get; set; }
+
+    protected List<InvestmentsHistory> investmentshistoryList = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        investmentsList = investmentServices.GetAll();
+
+        investmentshistoryList = await investmenthistoryService.GetAll();
+
+        currentUrl = _navigationManager.Uri;
+
+      
+    }
+
+}

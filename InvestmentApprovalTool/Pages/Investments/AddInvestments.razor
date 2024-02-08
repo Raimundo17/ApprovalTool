@@ -1,0 +1,1798 @@
+﻿@page "/AddInvestments"
+@page "/investments/edit/{Id:int}"
+
+@inherits CascadingDropdownComponentBase
+
+
+
+<h3>@Title an Investment</h3>
+<br />
+
+<EditForm Model="@investments">
+    <DataAnnotationsValidator />
+    <div class="col-lg-7">
+        <div class="user">
+            <div class="form-group row">
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                    Country
+                    <InputSelect id="Countries" class="form-control"
+                                 ValueExpression="@(() => CascadingVM.CountryId)"
+                                 Value="@CascadingVM.CountryId"
+                                 ValueChanged="@((string value) => OnCountryChange(value))">
+                        @foreach (var country in CascadingVM.ListofCountries)
+                        {
+                            if (country.Value == investments.CountryId.ToString())
+                            {
+                                <option selected value="@country.Value">@country.Text</option>
+                                CountryId = CascadingVM.CountryId;
+                            }
+                            else
+                            {
+                                <option value="@country.Value">@country.Text</option>
+                                CountryId = CascadingVM.CountryId;
+                            }
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col-sm-6">
+                    IR value (€) / DR NBV (€)
+                    <InputNumber class="form-control" @bind-Value="investments.IRValueEuro" />
+                    <ValidationMessage For="@(() => investments.IRValueEuro)" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                    Plant
+                    <InputSelect id="Plant" class="form-control"
+                                 ValueExpression="@(() => CascadingVM.PlantId)"
+                                 Value="@CascadingVM.PlantId"
+                                 ValueChanged="@((string value) => OnPlantChange(value))">
+                        @if (CascadingVM.ListofPlants != null)
+                        {
+                            @foreach (var plant in CascadingVM.ListofPlants)
+                            {
+                                if (plant.Value == investments.PlantId.ToString())
+                                {
+                                    <option selected value="@plant.Value">@plant.Text</option>
+                                    PlantId = CascadingVM.PlantId;
+                                }
+                                else
+                                {
+                                    <option value="@plant.Value">@plant.Text</option>
+                                    PlantId = CascadingVM.PlantId;
+                                }
+                            }
+                        }
+                    </InputSelect>
+
+                </div>
+                <div class="col-sm-6">
+                    Document Type
+                    <InputSelect class="form-control" @bind-Value="investments.DocTypeId">
+                        @foreach (var doctype in doctypeList)
+                        {
+                            <option value="@doctype.Id">@doctype.Description</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => investments.DocTypeId)" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                    IR / DR Number
+                    <InputText class="form-control" @bind-Value="investments.IR_DRNumber" />
+                    <ValidationMessage For="@(() => investments.IR_DRNumber)" />
+                </div>
+                <div class="col-sm-6">
+                    Project Title / Disposal Description
+                    <InputText class="form-control" @bind-Value="investments.ProjectTitle_DisposalDescription" />
+                    <ValidationMessage For="@(() => investments.ProjectTitle_DisposalDescription)" />
+                </div>
+                <div class="col-sm-6">
+                    Project Type
+                    <InputSelect class="form-control" @bind-Value="investments.ProjectTypeId">
+                        @foreach (var project in projectList)
+                        {
+                            <option value="@project.Id">@project.Description</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => investments.ProjectTypeId)" />
+                </div>
+                <div class="col-sm-6">
+                    AR Number
+                    <InputText class="form-control" @bind-Value="investments.ArNumber" />
+                    <ValidationMessage For="@(() => investments.ArNumber)" />
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-6">
+                Program Manager
+                <InputSelect id="ProgramManager" class="form-control"
+                             ValueExpression="@(() => CascadingVM.ProgramManagerId)"
+                             Value="@CascadingVM.ProgramManagerId"
+                             ValueChanged="@((string value) => OnProgramManagerChange(value))">
+                    @if (CascadingVM.ProgramManagerId != null)
+                    {
+                        @foreach (var programManager in CascadingVM.ListofProgramManagers)
+                        {
+                            if (programManager.Value == investments.ProgramManagerId.ToString())
+                            {
+                                <option selected value="@programManager.Value">@programManager.Text</option>
+                                ProgramManagerId = CascadingVM.ProgramManagerId;
+                            }
+                            else
+                            {
+                                <option value="@programManager.Value">@programManager.Text</option>
+                                ProgramManagerId = CascadingVM.ProgramManagerId;
+                            }
+                        }
+                    }
+                </InputSelect>
+
+                <ValidationMessage For="@(() => investments.ProgramManager)" />
+            </div>
+            <div class="col-sm-6">
+                Comments
+                <InputText class="form-control" @bind-Value="investments.Comments" />
+                <ValidationMessage For="@(() => investments.Comments)" />
+            </div>
+            <div class="col-sm-6">
+                Production Concept Change
+                <InputSelect class="form-control" @bind-Value="productionConceptChangeSelection">
+                    <option value=""></option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </InputSelect>
+            </div>
+        </div>
+        <hr />
+
+        @{
+            if (currentUser.RoleId != 15)
+            {
+                <div class="form-group row">
+                    <div class="col-sm-3 mb-3 mb-sm-3">
+                        Investment form
+                        <InputFile OnChange="InvestmentsForm" />
+                        <input type="button" class="btn btn-outline-danger" @onclick="RemoveInvestmentsForm" value="Remove File" />
+                        @{
+                            if (investmentformpath != null)
+                            {
+                                string investmentformpaths = "/Documentation/" + investmentformpath;
+                                <iframe src="@investmentformpaths" width="250px" height="250px"></iframe>
+                            }
+                            else if (Title == "Edit" & investments.Investment_Form != null)
+                            {
+                                string investmentformpaths = "/Documentation/" + investments.Investment_Form;
+                                <iframe src="@investmentformpaths" width="250px" height="250px"></iframe>
+                            }
+                        }
+                    </div>
+
+                    <div class="col-sm-3 mb-3 mb-sm-3">
+                        Disposal form
+                        <InputFile OnChange="DisposalForm" />
+                        <input type="button" class="btn btn-outline-danger" @onclick="RemoveDisposalForm" value="Remove File" />
+                        @{
+                            if (disposalformpath != null)
+                            {
+                                string disposalformpaths = "/Documentation/" + disposalformpath;
+                                <iframe src="@disposalformpaths" width="250px" height="250px"></iframe>
+                            }
+                            else if (Title == "Edit" & investments.Disposal_Form != null)
+                            {
+                                string disposalformpaths = "/Documentation/" + investments.Disposal_Form;
+                                <iframe src="@disposalformpaths" width="250px" height="250px"></iframe>
+                            }
+                        }
+                    </div>
+
+                    <div class="col-sm-3 mb-3 mb-sm-3">
+                        MSD
+                        <InputFile OnChange="MSD" />
+                        <input type="button" class="btn btn-outline-danger" @onclick="RemoveMSD" value="Remove File" />
+                        @{
+                            if (msdpath != null)
+                            {
+                                string msdpaths = "/Documentation/" + msdpath;
+                                <iframe src="@msdpaths" width="250px" height="250px"></iframe>
+                            }
+                            else if (Title == "Edit" & investments.MSD != null)
+                            {
+                                string msdpaths = "/Documentation/" + investments.MSD;
+                                <iframe src="@msdpaths" width="250px" height="250px"></iframe>
+                            }
+                        }
+                    </div>
+
+                    <div class="col-sm-3 mb-3 mb-sm-3">
+                        Exception Letter
+                        <InputFile OnChange="ExceptionLetter" />
+                        <input type="button" class="btn btn-outline-danger" @onclick="RemoveExceptionLetter" value="Remove File" />
+                        @{
+                            if (exceptionLetterpath != null)
+                            {
+                                string exceptionletterpaths = "/Documentation/" + exceptionLetterpath;
+                                <iframe src="@exceptionletterpaths" width="250px" height="250px"></iframe>
+                            }
+                            else if (Title == "Edit" & investments.Exception_Letter != null)
+                            {
+                                string exceptionletterpaths = "/Documentation/" + investments.Exception_Letter;
+                                <iframe src="@exceptionletterpaths" width="250px" height="250px"></iframe>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <div class="form-group row">
+
+                    <div class="col-sm-3 mb-3 mb-sm-3">
+                        ECCL's
+                        <InputFile OnChange="ECCLS" />
+                        <input type="button" class="btn btn-outline-danger" @onclick="RemoveECCLS" value="Remove File" />
+                        @{
+                            if (ecclspath != null)
+                            {
+                                string ecclspaths = "/Documentation/" + ecclspath;
+                                <iframe src="@ecclspaths" width="250px" height="250px"></iframe>
+                            }
+                            else if (Title == "Edit" & investments.ECCLS != null)
+                            {
+                                string ecclspaths = "/Documentation/" + investments.ECCLS;
+                                <iframe src="@ecclspaths" width="250px" height="250px"></iframe>
+                            }
+                        }
+                    </div>
+                    <div class="col-sm-3 mb-3 mb-sm-3">
+                        Rebill/PO sales confirmation
+                        <InputFile OnChange="RebillPOsalesconfirmation" />
+                        <input type="button" class="btn btn-outline-danger" @onclick="RemoveRebillPOSales" value="Remove File" />
+                        @{
+                            if (rebillPOsalesconfirmationpath != null)
+                            {
+                                string rebillposalesconfirmationpaths = "/Documentation/" + rebillPOsalesconfirmationpath;
+                                <iframe src="@rebillposalesconfirmationpaths" width="250px" height="250px"></iframe>
+                            }
+                            else if (Title == "Edit" & investments.RebillPOSalesConfirmation != null)
+                            {
+                                string rebillposalesconfirmationpaths = "/Documentation/" + investments.RebillPOSalesConfirmation;
+                                <iframe src="@rebillposalesconfirmationpaths" width="250px" height="250px"></iframe>
+                            }
+                        }
+                    </div>
+                    <div class="col-sm-3 mb-3 mb-sm-3">
+                        Others
+                        <InputFile OnChange="Others" />
+                        <input type="button" class="btn btn-outline-danger" @onclick="RemoveOthers" value="Remove File" />
+                        @{
+                            if (otherspath != null)
+                            {
+                                string other = "/Documentation/" + otherspath;
+                                <iframe src="@other" width="250px" height="250px"></iframe>
+                            }
+                            else if (Title == "Edit" & investments.Others != null)
+                            {
+                                string other = "/Documentation/" + investments.Others;
+                                <iframe src="@other" width="250px" height="250px"></iframe>
+                            }
+                        }
+                    </div>
+                    @{
+                        if (currentUser.RoleId == 7 | currentUser.RoleId == 9)
+                        {
+                            <div class="col-sm-3 mb-3 mb-sm-3">
+                                Others/MEC
+                                <InputFile OnChange="OthersMAC" />
+                                <input type="button" class="btn btn-outline-danger" @onclick="RemoveOthersMAC" value="Remove File" />
+                                @{
+                                    if (othersMACpath != null)
+                                    {
+                                        string otherMACpaths = "/Documentation/" + othersMACpath;
+                                        <iframe src="@otherMACpaths" width="250px" height="250px"></iframe>
+                                    }
+                                    else if (Title == "Edit" & investments.Others_MAC != null)
+                                    {
+                                        string otherMACpaths = "/Documentation/" + investments.Others_MAC;
+                                        <iframe src="@otherMACpaths" width="250px" height="250px"></iframe>
+                                    }
+                                }
+
+                            </div>
+                        }
+
+                        if (currentUser.RoleId == 12)
+                        {
+                            <div class="col-sm-3 mb-3 mb-sm-3">
+                                Others/CFI
+                                <InputFile OnChange="OthersCFI" />
+                                <input type="button" class="btn btn-outline-danger" @onclick="RemoveOthers" value="Remove File" />
+                                @{
+                                    if (othersCFIpath != null)
+                                    {
+                                        string otherCFIpaths = "/Documentation/" + othersCFIpath;
+                                        <iframe src="@otherCFIpaths" width="250px" height="250px"></iframe>
+                                    }
+                                    else if (Title == "Edit" & investments.Others_CFI != null)
+                                    {
+                                        string otherCFIpaths = "/Documentation/" + investments.Others_CFI;
+                                        <iframe src="@otherCFIpaths" width="250px" height="250px"></iframe>
+                                    }
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            }
+
+            if (currentUser.RoleId == 15)
+            {
+                <div class="form-group row">
+                    <div class="col-sm-3 mb-3 mb-sm-3">
+                        Release Document
+                        <InputFile OnChange="ReleaseDocument" />
+                        <input type="button" class="btn btn-outline-danger" @onclick="RemoveReleaseDocument" value="Remove File" />
+                        @{
+                            if (releasedocumentpath != null)
+                            {
+                                string releasedocumentpaths = "/Documentation/" + releasedocumentpath;
+                                <iframe src="@releasedocumentpaths" width="250px" height="250px"></iframe>
+                            }
+                            else if (investments.ReleasedDocument != null)
+                            {
+                                string releasedocumentpaths = "/Documentation/" + investments.ReleasedDocument;
+                                <iframe src="@releasedocumentpaths" width="250px" height="250px"></iframe>
+                            }
+                        }
+                    </div>
+
+                    <div class="col-sm-6">
+                        AR Number
+                        <InputText class="form-control" @bind-Value="investments.RegNumber" />
+                        <ValidationMessage For="@(() => investments.RegNumber)" />
+                    </div>
+
+                </div>
+            }
+        }
+    </div>
+    <div class="col-lg-3">
+        <ValidationSummary />
+    </div>
+
+    <hr />
+
+    <div style="margin-left:730px">
+        @{
+            if (Id == 0)
+            {
+                <input type="submit" style="margin-right:10px" class="btn btn-outline-success" value="Send to approval" @onclick="() => SubmitInvestment(investments)" />
+            }
+        }
+
+
+        @{
+            if (currentUser.RoleId != 15)
+            {
+                <input type="submit" style="margin-right:10px" class="btn btn-outline-info" @onclick="() => Save(investments)" value="Create/Save" />
+            }
+        }
+
+        <input type="button" class="btn btn-outline-danger" @onclick="Cancel" value="Cancel" />
+
+        @{
+            if (currentUser.RoleId == 15)
+            {
+                <input type="submit" class="btn btn-outline-success" value="Edit the Investment" @onclick="() => KrakowEditInvestment(investments)" />
+            }
+        }
+    </div>
+    <br />
+    <br />
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    protected Investments investments = new Investments();
+    protected List<ProjectType> projectList = new();
+    protected List<DocType> doctypeList = new();
+    protected List<User> managerList = new();
+    protected List<User> requestersList = new();
+    protected List<string> requesterList = new();
+    protected List<User> userList = new();
+    protected User? requesterMorocco { get; set; }
+    protected List<Comment> commentList = new();
+    protected string Title = "";
+    [CascadingParameter]
+    private User? currentUser { get; set; }
+    protected User? approver { get; set; }
+    protected List<string> approversList = new();
+    public string? email;
+    protected FXRate? fxRate { get; set; }
+    protected Comment comments = new Comment();
+    public string? CountryId { get; set; }
+    public string? PlantId { get; set; }
+    public string? ProgramManagerId { get; set; }
+    public string? fullpath { get; set; }
+    private List<IBrowserFile> loadedFiles = new();
+    private long maxFileSize = 2048 * 2048;
+    private int maxAllowedFiles = 3;
+    protected List<string> emailList = new List<string>();
+    protected User requester { get; set; }
+    protected User admin { get; set; }
+    protected List<string> investmentpdf = new List<string>();
+    protected InvestmentsHistory investmentsHistories = new InvestmentsHistory();
+    public string folder { get; set; }
+    public string fileName { get; set; }
+    private string historyPath { get; set; }
+    private string investmentformpath { get; set; }
+    private string disposalformpath { get; set; }
+    private string msdpath { get; set; }
+    private string exceptionLetterpath { get; set; }
+    private string ecclspath { get; set; }
+    private string rebillPOsalesconfirmationpath { get; set; }
+    private string otherspath { get; set; }
+    private string othersMACpath { get; set; }
+    private string othersCFIpath { get; set; }
+    private string releasedocumentpath { get; set; }
+    private string oldname { get; set; }
+    private string newname { get; set; }
+
+    private string productionConceptChangeSelection { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Só os requesters podem aceder para criar um investment
+        // Os approvers 7,9,12 e 15 podem editar o investment
+        if (currentUser.RoleId == 2 | currentUser.RoleId == 15 | currentUser.RoleId == 7 | currentUser.RoleId == 9 | currentUser.RoleId == 12)
+        {
+            projectList = await projecttypeService.GetAll();
+            doctypeList = await doctypeService.GetAll();
+            fxRate = await fxRateService.GetFxRate();
+            commentList = await commentService.GetAll();
+
+            //Tras os managers
+            managerList = await userService.GetLevelByIdList(8);
+
+            if (Id != 0)
+            {
+                Title = "Edit";
+                investments = await investmentServices.GetById(Id);
+            }
+            else
+            {
+                Title = "Add";
+            }
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+    }
+
+    // Create and sends investment to be approved
+    protected async Task SubmitInvestment(Investments investments)
+    {
+        // JANELA POP UP DE CONFIRMACAO DO ENVIO DO SUBMIT
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure document type is correct?");
+
+        if (confirmed == false)
+        {
+            _navigationManager.NavigateTo("/AddInvestments");
+            return;
+        }
+
+        if (CountryId != "" | PlantId != "")
+        {
+            investments.CountryId = Convert.ToInt32(CountryId);
+            investments.PlantId = Convert.ToInt32(PlantId);
+        }
+
+        //Check if the dropdown lists are choosen and if IR Value is  not 0
+        if (investments.CountryId == 0 | investments.DocTypeId == 0 | investments.ProjectTypeId == 1 && ProgramManagerId == "")
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Please fill the program manager!");
+            _navigationManager.NavigateTo("/AddInvestments");
+            return;
+        }
+
+        // Vai buscar o program manager se o project type for PP
+        if (investments.ProjectTypeId == 1)
+        {
+            investments.ProgramManagerId = Convert.ToInt32(ProgramManagerId);
+
+            // CHECK IF PRODUCTION CONCEPT CHANGE IS ANSWERED YES OR NO
+            if (productionConceptChangeSelection == null)
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "Please choose if production Concept change applies or not!");
+                _navigationManager.NavigateTo("/AddInvestments");
+                return;
+            }
+            else if (productionConceptChangeSelection == "Yes" || productionConceptChangeSelection == "No")
+            {
+                investments.productionConceptChange = productionConceptChangeSelection;
+            }
+        }
+
+        // The requester is the current user logged in
+        investments.RequesterId = currentUser.Id;
+
+        investments.ProcessLevelId = 2;
+
+        do
+        {
+            investments.ProcessLevelId += 1;
+
+            if (investments.ProcessLevelId > 6)
+            {
+                // Search for Approvers of MEC and after
+                userList = await userService.GetLevelByIdList(investments.ProcessLevelId);
+            }
+            else
+            {
+                // Search for Approvers by plant
+                userList = await userService.GetUserByLevelAndPlantList(investments.ProcessLevelId, investments.PlantId);
+            }
+        } while (userList.Count == 0);
+
+        foreach (var user in userList)
+        {
+            string email = user.Email;
+            approversList.Add(email);
+        }
+
+        // The investments status is set to pending
+        investments.StatusId = 2;
+
+        // IR Dollar Value calculated
+        investments.IRValueDollar = fxRate.FXRateValue * investments.IRValueEuro;
+
+        try
+        {
+            // Investment is created
+            await investmentServices.Create(investments);
+
+            // Investment history is created
+            investmentsHistories.InvestmentsId = investments.Id;
+            await investmenthistoryService.Create(investmentsHistories);
+
+            // Comments are created
+            comments.InvestmentsId = investments.Id;
+            await commentService.Create(comments);
+
+            requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+            foreach (var requester in requestersList)
+            {
+                string email = requester.Email;
+                requesterList.Add(email);
+            }
+
+            await JsRuntime.InvokeVoidAsync("alert", "The investment was successfully created and sent to the next approver!");
+
+        }
+        catch (Exception)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "There was a problem saving the investment!");
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+
+        //Change the name of the investment form file so it is the same has the IR_DR Number
+#if DEBUG
+    string newname = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.IR_DRNumber + ".pdf";
+    oldname = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Investment_Form;
+
+    if (investments.Investment_Form != null)
+    {
+    File.Move(oldname, newname, true);
+
+    if (!File.Exists(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + oldname))
+    {
+    investments.Investment_Form = investments.IR_DRNumber + ".pdf";
+    await investmentServices.Update(investments);
+    }
+    }
+
+#elif RELEASE
+    string newname = @"C:E:\\xxxxxxx\xxxxxxx-Investments\" + investments.IR_DRNumber + ".pdf";
+    oldname = @"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Investment_Form;
+
+    if (investments.Investment_Form != null)
+    {
+    File.Move(oldname, newname, true);
+
+    if (!File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + oldname))
+    {
+    investments.Investment_Form = investments.IR_DRNumber + ".pdf";
+    await investmentServices.Update(investments);
+    }
+    }
+
+#else
+        string newname = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.IR_DRNumber + ".pdf";
+        oldname = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Investment_Form;
+
+        if (investments.Investment_Form != null)
+        {
+            File.Move(oldname, newname, true);
+
+            if (!File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + oldname))
+            {
+                investments.Investment_Form = investments.IR_DRNumber + ".pdf";
+                await investmentServices.Update(investments);
+            }
+        }
+
+#endif
+
+        try
+        {
+            await MailService.SentForApprovalList(approversList, requesterList, investments);
+        }
+        catch (Exception ex)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "The investment was sent to the next approver but the next approver is not going to receive the email notification!");
+        }
+
+        _navigationManager.NavigateTo("/");
+
+    }
+
+    // Creates and investment and stores it in the database without sending to approval and also to edit the investment
+    protected async Task Save(Investments investments)
+    {
+        // JANELA POP UP DE CONFIRMACAO DO ENVIO DO SUBMIT
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure document type is correct?");
+
+        if (confirmed == false)
+        {
+            _navigationManager.NavigateTo("/AddInvestments");
+            return;
+        }
+
+        if (CountryId != "" | PlantId != "")
+        {
+            investments.CountryId = Convert.ToInt32(CountryId);
+            investments.PlantId = Convert.ToInt32(PlantId);
+        }
+
+        // Couldn´t editing the investment correctly because of the Program Manager dropdown
+        if (Id != 0 && ProgramManagerId == "")
+        {
+            ProgramManagerId = investments.ProgramManagerId.ToString();
+        }
+
+        //Check if the dropdown´s are choosen and IR Value is not 0
+        if (investments.CountryId == 0 | investments.DocTypeId == 0 | investments.ProjectTypeId == 0 | investments.ProjectTypeId == 1 && ProgramManagerId == "")
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Please fill the program manager!");
+            _navigationManager.NavigateTo("AddInvestments");
+            return;
+        }
+
+        if (investments.ProjectTypeId == 1)
+        {
+            investments.ProgramManagerId = Convert.ToInt32(ProgramManagerId);
+
+            //----- UNCOMMENT 1ST SEPTEMBER !! -------------------------------------------------------------------------
+            // CHECK IF PRODUCTION CONCEPT CHANGE IS ANSWERED YES OR NO
+            if (productionConceptChangeSelection == null)
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "Please choose if production Concept change applies or not!");
+                _navigationManager.NavigateTo("/AddInvestments");
+                return;
+            }
+            else if (productionConceptChangeSelection == "Yes" || productionConceptChangeSelection == "No")
+            {
+                investments.productionConceptChange = productionConceptChangeSelection;
+            }
+            // ---------------------------------------------------------------------------------------------------
+        }
+
+        // If the current user is requester the investment is set to requester level when it´s edited
+        if (currentUser.RoleId == 2)
+        {
+            // The requester is the current user logged in
+            investments.RequesterId = currentUser.Id;
+            investments.ProcessLevelId = 2;
+
+            // CLEAR PREVIOUS APPROVALS BECAUSE THE INVESTMENT WAS EDITED BY THE USER
+            investments.Approver3hasReviewed = false;
+            investments.Approver4hasReviewed = false;
+            investments.Approver5hasReviewed = false;
+            investments.Approver6hasReviewed = false;
+            investments.Approver7hasReviewed = false;
+            investments.Approver8hasReviewed = false;
+            investments.Approver9hasReviewed = false;
+            investments.Approver10hasReviewed = false;
+            investments.Approver11hasReviewed = false;
+            investments.Approver12hasReviewed = false;
+            investments.Approver13hasReviewed = false;
+            investments.Approver14hasReviewed = false;
+            investments.Approver15hasReviewed = false;
+        }
+
+        // IR Dollar Value calculated
+        investments.IRValueDollar = fxRate.FXRateValue * investments.IRValueEuro;
+
+        if (Id == 0)
+        {
+            // The investment status is set to created
+            investments.StatusId = 1;
+
+            try
+            {
+                await investmentServices.Create(investments);
+
+                // Investment history is created
+                investmentsHistories.InvestmentsId = investments.Id;
+                await investmenthistoryService.Create(investmentsHistories);
+
+                // Comments are created
+                comments.InvestmentsId = investments.Id;
+                await commentService.Create(comments);
+
+                await JsRuntime.InvokeVoidAsync("alert", "The investment was created successfully");
+            }
+            catch (Exception)
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "There was an error creating the investment");
+                _navigationManager.NavigateTo("AddInvestments");
+                return;
+            }
+        }
+        else
+        {
+            try
+            {
+                await investmentServices.Update(investments);
+                await JsRuntime.InvokeVoidAsync("alert", "The investment was edited successfully");
+            }
+            catch (Exception)
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "There was an error updating the investment");
+                _navigationManager.NavigateTo("AddInvestments");
+                return;
+            }
+        }
+
+        //Change the name of the investment form file so it is the same has the IR_DR Number
+#if DEBUG
+    string newname = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.IR_DRNumber + ".pdf";
+    oldname = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Investment_Form;
+
+    if (investments.Investment_Form != null)
+    {
+    File.Move(oldname, newname, true);
+
+    if (!File.Exists(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + oldname))
+    {
+    investments.Investment_Form = investments.IR_DRNumber + ".pdf";
+    await investmentServices.Update(investments);
+    }
+    }
+
+#elif RELEASE
+    string newname = @"C:E:\\xxxxxxx\xxxxxxx-Investments\" + investments.IR_DRNumber + ".pdf";
+    oldname = @"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Investment_Form;
+
+    if (investments.Investment_Form != null)
+    {
+    File.Move(oldname, newname, true);
+
+    if (!File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + oldname))
+    {
+    investments.Investment_Form = investments.IR_DRNumber + ".pdf";
+    await investmentServices.Update(investments);
+    }
+    }
+
+#else
+        string newname = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.IR_DRNumber + ".pdf";
+        oldname = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Investment_Form;
+
+        if (investments.Investment_Form != null)
+        {
+            File.Move(oldname, newname, true);
+
+            if (!File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + oldname))
+            {
+                investments.Investment_Form = investments.IR_DRNumber + ".pdf";
+                await investmentServices.Update(investments);
+            }
+        }
+#endif
+
+        _navigationManager.NavigateTo("/");
+    }
+
+    // Krakow Finance Team Editing After Released
+    protected async Task KrakowEditInvestment(Investments investments)
+    {
+        if (CountryId != "" | PlantId != "")
+        {
+            investments.CountryId = Convert.ToInt32(CountryId);
+            investments.PlantId = Convert.ToInt32(PlantId);
+        }
+
+        //Check if the dropdown´s are choosen and IR Value is not 0
+        if (investments.CountryId == 0 | investments.DocTypeId == 0 | investments.ProjectTypeId == 0)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Please fill all the necessary information ");
+            _navigationManager.NavigateTo("AddInvestments");
+            return;
+        }
+
+        // Envia para o requester, admins, approvers nivel 9 (Capital Manager) e nivel 12 (Krakow Finance Leader)
+
+        List<User> approver7list = new List<User>();
+        approver7list = await userService.GetLevelByIdList(7);
+        foreach (var email7 in approver7list)
+        {
+            string seven = email7.Email;
+            emailList.Add(seven);
+        }
+
+        User approver9 = await userService.GetUserByLevel(9);
+        User approver12 = await userService.GetUserByLevel(12);
+        User approver15 = await userService.GetUserByLevel(15);
+
+        emailList.Add(approver9.Email);
+        emailList.Add(approver12.Email);
+        emailList.Add(approver15.Email);
+
+        // Morocco, Serbia, Ukraine, Romania, Poland, Germany have multiple requesters
+        if (investments.CountryId == 2 | investments.CountryId == 3 | investments.CountryId == 5 | investments.CountryId == 6 | investments.CountryId == 7 | investments.CountryId == 10 | investments.CountryId == 11 | investments.CountryId == 12
+        | investments.CountryId == 13 | investments.CountryId == 14 | investments.CountryId == 15 | investments.CountryId == 16)
+        {
+            requestersList = await userService.GetUserByLevelAndCountryList(2, investments.CountryId);
+
+            foreach (var requester in requestersList)
+            {
+                string email = requester.Email;
+                requesterList.Add(email);
+            }
+        }
+        else
+        {
+            emailList.Add(investments.Requester.Email);
+        }
+
+        // Tras o investments history correspondente ao investment atual
+        investmentsHistories = await investmenthistoryService.GetInvestmentHistoryByInvestmentId(investments.Id);
+
+        //Change the name of the release document file so it includes the regnumber
+        if (investments.ReleasedDocument != null)
+        {
+#if DEBUG
+    string newname = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.RegNumber + ".pdf";
+    oldname = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.ReleasedDocument;
+#elif RELEASE
+    string newname = @"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.RegNumber + ".pdf";
+    oldname = @"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.ReleasedDocument;
+#else
+            string newname = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.RegNumber + ".pdf";
+            oldname = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.ReleasedDocument;
+#endif
+
+            File.Move(oldname, newname, true);
+
+#if DEBUG
+    if (!File.Exists(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + oldname))
+    {
+    investments.ReleasedDocument = investments.RegNumber + ".pdf";
+    await investmentServices.Update(investments);
+    }
+#elif RELEASE
+    if (!File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + oldname))
+    {
+    investments.ReleasedDocument = investments.RegNumber + ".pdf";
+    await investmentServices.Update(investments);
+    }
+#else
+            if (!File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + oldname))
+            {
+                investments.ReleasedDocument = investments.RegNumber + ".pdf";
+                await investmentServices.Update(investments);
+            }
+#endif
+
+            // Anexar release document ao email
+#if DEBUG
+    string releasedoc = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.ReleasedDocument;
+#elif RELEASE
+    string releasedoc = @"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.ReleasedDocument;
+#else
+            string releasedoc = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.ReleasedDocument;
+#endif
+            investmentpdf.Add(releasedoc);
+        }
+
+        // CHAMAR HISTORIC DOCUMENT SERVICE
+        historyPath = historicdocumentService.CreateHistoricDocument(investments, investmentsHistories);
+
+        //Anexa no email
+        investmentpdf.Add(historyPath);
+
+        string fileName = "Historic_Of_Approvers_" + investments.RegNumber + ".pdf";
+
+        investments.HistoryPDF = fileName;
+
+        try
+        {
+            await investmentServices.Update(investments);
+
+            // Sends the email to the requester and approvers with the release investment information
+            await MailService.SentReleaseList(requesterList, emailList, investmentpdf, investments);
+
+
+            await JsRuntime.InvokeVoidAsync("alert", "The investment was successfully edited!");
+
+
+            System.GC.Collect();
+            System.GC.WaitForPendingFinalizers();
+        }
+        catch (Exception)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "There was a problem editing the investment!");
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+
+
+        _navigationManager.NavigateTo("/");
+    }
+
+    public async void Cancel()
+    {
+        // Apaga anexos que foram carregados para a aplicação mas que o user nao os submeteu (apaga so deste determinado investment)
+        // O user 15 tem anexos ja em released nao pode apagar!!!
+        if (currentUser.RoleId == 2)
+        {
+            // ---- Investment Form ----------
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Investment_Form))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Investment_Form);
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Investment_Form))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Investment_Form);
+    investments.Investment_Form = null;
+    investmentformpath = null;
+    }
+#else
+            if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Investment_Form))
+            {
+                File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Investment_Form);
+                investments.Investment_Form = null;
+                investmentformpath = null;
+            }
+#endif
+            // ---- Disposal Form -----------
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Disposal_Form))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Disposal_Form);
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Disposal_Form))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Disposal_Form);
+    investments.Disposal_Form = null;
+    disposalformpath = null;
+    }
+#else
+            if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Disposal_Form))
+            {
+                File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Disposal_Form);
+                investments.Disposal_Form = null;
+                disposalformpath = null;
+            }
+#endif
+
+            // ---- MSD ---------------------
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.MSD))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.MSD);
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.MSD))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.MSD);
+    investments.MSD = null;
+    msdpath = null;
+    }
+#else
+            if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.MSD))
+            {
+                File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.MSD);
+                investments.MSD = null;
+                msdpath = null;
+            }
+#endif
+
+            // ---- Exception Letter -------------
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Exception_Letter))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Exception_Letter);
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Exception_Letter))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Exception_Letter);
+    investments.Exception_Letter = null;
+    exceptionLetterpath = null;
+    }
+#else
+            if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Exception_Letter))
+            {
+                File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Exception_Letter);
+                investments.Exception_Letter = null;
+                exceptionLetterpath = null;
+            }
+#endif
+
+            // ---- ECCLS ------------------------
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.ECCLS))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.ECCLS);
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.ECCLS))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.ECCLS);
+    investments.Investment_Form = null;
+    investmentformpath = null;
+    }
+#else
+            if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.ECCLS))
+            {
+                File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.ECCLS);
+                investments.ECCLS = null;
+                ecclspath = null;
+            }
+#endif
+
+            // ---- RebillPOSalesConfirmation -------
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.RebillPOSalesConfirmation))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.RebillPOSalesConfirmation);
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.RebillPOSalesConfirmation))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.RebillPOSalesConfirmation);
+    investments.Investment_Form = null;
+    investmentformpath = null;
+    }
+#else
+            if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.RebillPOSalesConfirmation))
+            {
+                File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.RebillPOSalesConfirmation);
+                investments.RebillPOSalesConfirmation = null;
+                rebillPOsalesconfirmationpath = null;
+            }
+#endif
+
+            // ---- Others ---------------------------
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Others))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Others);
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Others))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Others);
+    investments.Investment_Form = null;
+    investmentformpath = null;
+    }
+#else
+            if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Others))
+            {
+                File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Others);
+                investments.Others = null;
+                otherspath = null;
+            }
+#endif
+
+            // ---- Others_MAC ---------------------------
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Others_MAC))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Others_MAC);
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Others_MAC))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Others_MAC);
+    investments.Others_MAC = null;
+    othersMACpath = null;
+    }
+#else
+            if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Others_MAC))
+            {
+                File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Others_MAC);
+                investments.Others_MAC = null;
+                othersMACpath = null;
+            }
+#endif
+
+            // ---- Others_CFI ---------------------------
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Others_CFI))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool_MOCKUP\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Others_CFI);
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Others_CFI))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Others_CFI);
+    investments.Others_CFI = null;
+    othersCFIpath = null;
+    }
+#else
+            if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Others_CFI))
+            {
+                File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Others_CFI);
+                investments.Others_CFI = null;
+                othersCFIpath = null;
+            }
+#endif
+
+        }
+
+        _navigationManager.NavigateTo("/");
+    }
+
+    private async Task InvestmentsForm(InputFileChangeEventArgs e)
+    {
+        Guid g = Guid.NewGuid();
+
+        string name = g + ".pdf";
+
+        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        {
+            //Amsterdam Server
+#if DEBUG
+    var path = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + name;
+#elif RELEASE
+    var path = @"E:\\xxxxxxx\xxxxxxx-Investments\" + name;
+#else
+            var path = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + name;
+
+
+#endif
+
+            try
+            {
+                await using FileStream fs = new FileStream(path, FileMode.Create);
+
+                if (file.Size > 4194304)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The file must be smaller than 4MB!");
+                    return;
+                }
+
+                await file.OpenReadStream(maxFileSize).CopyToAsync(fs);
+
+                investmentformpath = name.ToString();
+                investments.Investment_Form = investmentformpath;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+    }
+
+    public async void RemoveInvestmentsForm()
+    {
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Investment_Form))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Investment_Form);
+    investments.Investment_Form = null;
+    investmentformpath = null;
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Investment_Form))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Investment_Form);
+    investments.Investment_Form = null;
+    investmentformpath = null;
+    }
+#else
+        if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Investment_Form))
+        {
+            File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Investment_Form);
+            investments.Investment_Form = null;
+            investmentformpath = null;
+        }
+#endif
+    }
+
+    private async Task DisposalForm(InputFileChangeEventArgs e)
+    {
+        Guid g = Guid.NewGuid();
+
+        string name = g + ".pdf";
+
+        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        {
+#if DEBUG
+    var path = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + name;
+#elif RELEASE
+    var path = @"E:\\xxxxxxx\xxxxxxx-Investments\" + name;
+#else
+            var path = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + name;
+#endif
+
+            try
+            {
+                await using FileStream fs = new FileStream(path, FileMode.Create);
+
+                if (file.Size > 4194304)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The file must be smaller than 4MB!");
+                    return;
+                }
+
+                await file.OpenReadStream(maxFileSize).CopyToAsync(fs);
+                disposalformpath = name.ToString();
+                investments.Disposal_Form = disposalformpath;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+    }
+
+    public async void RemoveDisposalForm()
+    {
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Disposal_Form))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Disposal_Form);
+    investments.Disposal_Form = null;
+    disposalformpath = null;
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Disposal_Form))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Disposal_Form);
+    investments.Disposal_Form = null;
+    disposalformpath = null;
+    }
+#else
+        if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Disposal_Form))
+        {
+            File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Disposal_Form);
+            investments.Disposal_Form = null;
+            disposalformpath = null;
+        }
+#endif
+    }
+
+    private async Task MSD(InputFileChangeEventArgs e)
+    {
+        Guid g = Guid.NewGuid();
+
+        string name = g + ".pdf";
+
+        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        {
+#if DEBUG
+    var path = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + name;
+#elif RELEASE
+    var path = @"E:\\xxxxxxx\xxxxxxx-Investments\" + name;
+#else
+            var path = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + name;
+#endif
+
+            try
+            {
+                await using FileStream fs = new FileStream(path, FileMode.Create);
+
+                if (file.Size > 4194304)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The file must be smaller than 4MB!");
+                    return;
+                }
+
+                await file.OpenReadStream(maxFileSize).CopyToAsync(fs);
+                msdpath = name.ToString();
+                investments.MSD = msdpath;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+    }
+
+    public async void RemoveMSD()
+    {
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.MSD))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.MSD);
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.MSD))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.MSD);
+    investments.MSD = null;
+    msdpath = null;
+    }
+#else
+        if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.MSD))
+        {
+            File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.MSD);
+            investments.MSD = null;
+            msdpath = null;
+        }
+#endif
+    }
+
+    private async Task ExceptionLetter(InputFileChangeEventArgs e)
+    {
+        Guid g = Guid.NewGuid();
+
+        string name = g + ".pdf";
+
+        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        {
+#if DEBUG
+    var path = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + name;
+#elif RELEASE
+    var path = @"E:\\xxxxxxx\xxxxxxx-Investments\" + name;
+#else
+            var path = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + name;
+#endif
+            try
+            {
+                await using FileStream fs = new FileStream(path, FileMode.Create);
+
+                if (file.Size > 4194304)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The file must be smaller than 4MB!");
+                    return;
+                }
+
+                await file.OpenReadStream(maxFileSize).CopyToAsync(fs);
+                exceptionLetterpath = name.ToString();
+                investments.Exception_Letter = exceptionLetterpath;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+    }
+
+    public async void RemoveExceptionLetter()
+    {
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Exception_Letter))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Exception_Letter);
+    investments.Exception_Letter = null;
+    exceptionLetterpath = null;
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Exception_Letter))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Exception_Letter);
+    investments.Exception_Letter = null;
+    exceptionLetterpath = null;
+    }
+#else
+        if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Exception_Letter))
+        {
+            File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Exception_Letter);
+            investments.Exception_Letter = null;
+            exceptionLetterpath = null;
+        }
+#endif
+    }
+
+    private async Task ECCLS(InputFileChangeEventArgs e)
+    {
+        Guid g = Guid.NewGuid();
+
+        string name = g + ".pdf";
+
+        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        {
+#if DEBUG
+    var path = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + name;
+#elif RELEASE
+    var path = @"E:\\xxxxxxx\xxxxxxx-Investments\" + name;
+#else
+            var path = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + name;
+#endif
+            try
+            {
+                await using FileStream fs = new FileStream(path, FileMode.Create);
+
+                if (file.Size > 4194304)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The file must be smaller than 4MB!");
+                    return;
+                }
+
+                await file.OpenReadStream(maxFileSize).CopyToAsync(fs);
+                ecclspath = name.ToString();
+                investments.ECCLS = ecclspath;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+    }
+
+    public async void RemoveECCLS()
+    {
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.ECCLS))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.ECCLS);
+    investments.ECCLS = null;
+    ecclspath = null;
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.ECCLS))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.ECCLS);
+    investments.ECCLS = null;
+    ecclspath = null;
+    }
+#else
+        if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.ECCLS))
+        {
+            File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.ECCLS);
+            investments.ECCLS = null;
+            ecclspath = null;
+        }
+#endif
+    }
+
+    private async Task RebillPOsalesconfirmation(InputFileChangeEventArgs e)
+    {
+        Guid g = Guid.NewGuid();
+
+        string name = g + ".pdf";
+
+        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        {
+#if DEBUG
+    var path = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + name;
+#elif RELEASE
+    var path = @"E:\\xxxxxxx\xxxxxxx-Investments\" + name;
+#else
+            var path = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + name;
+#endif
+            try
+            {
+                await using FileStream fs = new FileStream(path, FileMode.Create);
+
+                if (file.Size > 4194304)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The file must be smaller than 4MB!");
+                    return;
+                }
+
+                await file.OpenReadStream(maxFileSize).CopyToAsync(fs);
+                rebillPOsalesconfirmationpath = name.ToString();
+                investments.RebillPOSalesConfirmation = rebillPOsalesconfirmationpath;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+    }
+
+    public async void RemoveRebillPOSales()
+    {
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.RebillPOSalesConfirmation))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.RebillPOSalesConfirmation);
+    investments.RebillPOSalesConfirmation = null;
+    rebillPOsalesconfirmationpath = null;
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.RebillPOSalesConfirmation))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.RebillPOSalesConfirmation);
+    investments.RebillPOSalesConfirmation = null;
+    rebillPOsalesconfirmationpath = null;
+    }
+#else
+        if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.RebillPOSalesConfirmation))
+        {
+            File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.RebillPOSalesConfirmation);
+            investments.RebillPOSalesConfirmation = null;
+            rebillPOsalesconfirmationpath = null;
+        }
+#endif
+    }
+
+    private async Task Others(InputFileChangeEventArgs e)
+    {
+        Guid g = Guid.NewGuid();
+
+        string name = g + ".pdf";
+
+        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        {
+#if DEBUG
+    var path = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + name;
+#elif RELEASE
+    var path = @"E:\\xxxxxxx\xxxxxxx-Investments\" + name;
+#else
+            var path = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + name;
+#endif
+            try
+            {
+                await using FileStream fs = new FileStream(path, FileMode.Create);
+
+                if (file.Size > 4194304)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The file must be smaller than 4MB!");
+                    return;
+                }
+
+                await file.OpenReadStream(maxFileSize).CopyToAsync(fs);
+                otherspath = name.ToString();
+                investments.Others = otherspath;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+    }
+
+    public async void RemoveOthers()
+    {
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Others))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Others);
+     investments.Others = null;
+    otherspath = null;
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Others))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Others);
+    investments.Others = null;
+    otherspath = null;
+    }
+#else
+        if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Others))
+        {
+            File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Others);
+            investments.Others = null;
+            otherspath = null;
+        }
+#endif
+    }
+
+    private async Task OthersMAC(InputFileChangeEventArgs e)
+    {
+        Guid g = Guid.NewGuid();
+
+        string name = g + ".pdf";
+
+        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        {
+#if DEBUG
+    var path = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + name;
+#elif RELEASE
+    var path = @"E:\\xxxxxxx\xxxxxxx-Investments\" + name;
+#else
+            var path = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + name;
+#endif
+            try
+            {
+                await using FileStream fs = new FileStream(path, FileMode.Create);
+
+                if (file.Size > 4194304)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The file must be smaller than 4MB!");
+                    return;
+                }
+
+                await file.OpenReadStream(maxFileSize).CopyToAsync(fs);
+                othersMACpath = name.ToString();
+                investments.Others_MAC = othersMACpath;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+    }
+
+    public async void RemoveOthersMAC()
+    {
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Others_MAC))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Others_MAC);
+     investments.Others_MAC = null;
+    othersMACpath = null;
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Others_MAC))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Others_MAC);
+    investments.Others_MAC = null;
+    othersMACpath = null;
+    }
+#else
+        if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Others_MAC))
+        {
+            File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Others_MAC);
+            investments.Others_MAC = null;
+            othersMACpath = null;
+        }
+#endif
+    }
+
+    private async Task OthersCFI(InputFileChangeEventArgs e)
+    {
+        Guid g = Guid.NewGuid();
+
+        string name = g + ".pdf";
+
+        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        {
+#if DEBUG
+    var path = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + name;
+#elif RELEASE
+    var path = @"E:\\xxxxxxx\xxxxxxx-Investments\" + name;
+#else
+            var path = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + name;
+#endif
+            try
+            {
+                await using FileStream fs = new FileStream(path, FileMode.Create);
+
+                if (file.Size > 4194304)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The file must be smaller than 4MB!");
+                    return;
+                }
+
+                await file.OpenReadStream(maxFileSize).CopyToAsync(fs);
+                othersCFIpath = name.ToString();
+                investments.Others_CFI = othersCFIpath;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+    }
+
+    public async void RemoveOthersCFI()
+    {
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Others_CFI))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.Others_CFI);
+    investments.Others_CFI = null;
+    othersCFIpath = null;
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Others_CFI))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.Others_CFI);
+    investments.Others_CFI = null;
+    othersCFIpath = null;
+    }
+#else
+        if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Others_CFI))
+        {
+            File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.Others_CFI);
+            investments.Others_CFI = null;
+            othersCFIpath = null;
+        }
+#endif
+    }
+
+    private async Task ReleaseDocument(InputFileChangeEventArgs e)
+    {
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.ReleasedDocument))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.ReleasedDocument);
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.ReleasedDocument))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.ReleasedDocument);
+    }
+#else
+        if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.ReleasedDocument))
+        {
+            File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.ReleasedDocument);
+        }
+#endif
+        Guid g = Guid.NewGuid();
+
+        string name = g + ".pdf";
+
+        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        {
+#if DEBUG
+    var path = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + name;
+#elif RELEASE
+    var path = @"E:\\xxxxxxx\xxxxxxx-Investments\" + name;
+#else
+            var path = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + name;
+#endif
+            try
+            {
+                await using FileStream fs = new FileStream(path, FileMode.Create);
+
+                if (file.Size > 4194304)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The file must be smaller than 4MB!");
+                    return;
+                }
+
+                await file.OpenReadStream(maxFileSize).CopyToAsync(fs);
+                releasedocumentpath = name.ToString();
+                investments.ReleasedDocument = releasedocumentpath;
+            }
+            catch
+            {
+                throw;
+            }
+
+        }
+    }
+
+    public async void RemoveReleaseDocument()
+    {
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.ReleasedDocument))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.ReleasedDocument);
+    investments.ReleasedDocument = null;
+    releasedocumentpath = null;
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.ReleasedDocument))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.ReleasedDocument);
+    investments.ReleasedDocument = null;
+    releasedocumentpath = null;
+    }
+#else
+        if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.ReleasedDocument))
+        {
+            File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.ReleasedDocument);
+            investments.ReleasedDocument = null;
+            releasedocumentpath = null;
+        }
+#endif
+    }
+}

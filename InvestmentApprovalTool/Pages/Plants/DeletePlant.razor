@@ -1,0 +1,53 @@
+﻿@page "/plant/delete/{Id:int}/{PlantName}"
+
+<h2>Delete Plant</h2>
+<br />
+
+<div class="col-lg-6">
+    <h4>Do you want to delete this plant?</h4>
+    <hr/>
+    <div class="mb-3 row g-3">
+        <h6 style="font-size:xx-large" class="col-7 col-form-label">@PlantName</h6>
+    </div>
+    <div class="row gx-5">
+         <button type="submit" class="col-sm-12 col-6 btn btn-danger" @onclick="(async () => await RemovePlant(plant))">Delete</button>
+        <div>&nbsp</div>
+        <button type="submit" class="col-sm-12 col-6 btn btn-warning" @onclick="Cancel">Cancel</button>
+    </div>
+</div>
+<br />
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    [Parameter]
+    public string PlantName { get; set; }
+    [CascadingParameter]
+    private User currentUser { get; set; }
+    Plant plant = new Plant();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Só os admins podem aceder
+        if (currentUser.IsAdmin == true && currentUser.isActive == true)
+        {
+            plant = await plantService.GetById(Id);
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+    }
+
+    protected async Task RemovePlant(Plant plant)
+    {
+        await plantService.Delete(plant);
+        await JsRuntime.InvokeVoidAsync("alert", "Plant " + plant.PlantName + " was sucessfully deleted!");
+        _navigationManager.NavigateTo("/AllPlants");
+    }
+    void Cancel()
+    {
+        _navigationManager.NavigateTo("/AllPlants");
+    }
+}

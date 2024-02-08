@@ -1,0 +1,75 @@
+﻿@page "/AddProjectType"
+@page "/projecttype/edit/{Id:int}"
+
+<h3>@Title a Project Type</h3>
+<br />
+
+<EditForm Model="@projecttype" OnValidSubmit="SaveProjectType">
+    <DataAnnotationsValidator />
+    <div class="col-lg-6">
+        <div class="mb-3 row g-3">
+            <label for="Description" class="col-3 col-form-label">Description</label>
+            <InputText id="Description" class="col-7 form-control" @bind-Value="projecttype.Description" />
+        </div>
+        <div class="row gx-5">
+            <button type="submit" class="col btn btn-primary">Save</button>
+            <div>&nbsp</div>
+            <button type="button" class="col btn btn-primary" @onclick="Cancel">Cancel</button>
+        </div>
+        <ValidationMessage For="@(() => projecttype.Description)" />
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    [CascadingParameter]
+    protected User currentUser { get; set; }
+    protected ProjectType projecttype = new ProjectType();
+    protected string Title = "";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Só os admins podem aceder
+        if (currentUser.IsAdmin == true && currentUser.isActive == true)
+        {
+
+            if (Id != 0)
+            {
+                Title = "Edit";
+                projecttype = await projecttypeService.GetById(Id);
+            }
+            else
+            {
+                Title = "Add";
+            }
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+    }
+
+    protected async Task SaveProjectType()
+    {
+        if (projecttype.Id != 0)
+        {
+            await projecttypeService.Update(projecttype);
+            await JsRuntime.InvokeVoidAsync("alert", "Project Type " + projecttype.Description + " was sucessfully edited!");
+        }
+        else
+        {
+            await projecttypeService.Create(projecttype);
+            await JsRuntime.InvokeVoidAsync("alert", "Project Type " + projecttype.Description + " was sucessfully created!");
+        }
+
+        _navigationManager.NavigateTo("/AllProjectTypes");
+    }
+
+    public void Cancel()
+    {
+        _navigationManager.NavigateTo("/AllProjectTypes");
+    }
+
+}

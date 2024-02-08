@@ -1,0 +1,103 @@
+﻿@page "/plant/details/{Id:int}"
+
+@{
+    string x = plantId;
+}
+
+<h3>Users of plant @UsersListofPlant.Select(P => P.Plant.PlantName).FirstOrDefault();</h3>
+
+@foreach (var item in UsersListofPlant)
+{
+    <EditForm Model="@item" OnValidSubmit="SubmitUser">
+        <div class="col-lg-7">
+            <div class="user">
+                <div class="form-group row">
+                    <br>
+                    <div>
+                        <br>
+                        <h3>@item.Role.Description</h3>
+                    </div>
+                    <div>
+                        Name
+                        <InputText disabled="disabled" class="col-7 form-control" @bind-Value="item.Name" />
+                        <ValidationMessage For="@(() => item.Name)" />
+                           
+                    </div>
+                    <div>
+                        Email
+                        <InputText disabled="disabled" class="col-7 form-control" @bind-Value="item.Email" />
+                        <ValidationMessage For="@(() => item.Email)" />
+                    </div>
+                    <div>
+                        Is Active?
+                        <InputCheckbox @bind-Value="item.isActive" />
+                    </div>
+                    <br>
+                    <input type="submit" style="margin-right:10px; width:100px" class="btn btn-outline-danger" @onclick="() => RemoveUser(item.Id)" value="Delete" />
+                </div>
+            </div>
+
+            @{
+                user = item;
+            }
+
+            <br>
+        </div>
+    </EditForm>
+}
+
+<input type="submit" style="margin-right:10px" class="btn btn-outline-info" @onclick="() => SubmitUser()" value="Save" />
+
+<input type="button" class="btn btn-outline-danger" @onclick="Cancel" value="Cancel" />
+
+@code {
+    [Parameter]
+    public string NetId { get; set; }
+    [Parameter]
+    public string plantId { get; set; }
+
+    public List<User> UsersListofPlant { get; set; }
+
+    protected User user = new User();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // tras os users associados a esta plant pelo ID para o popup
+        UsersListofPlant = await userService.GetUsersOfPlant(Convert.ToInt32(plantId));
+
+    }
+
+    protected async Task SubmitUser()
+    {
+        await userService.SubmitUser(user);
+
+        _navigationManager.NavigateTo("/AllUsers", forceLoad: true);
+    }
+
+    protected async Task RemoveUser(int id)
+    {
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this user? This action cannot be reversed!");
+
+        if (confirmed == false)
+        {
+            _navigationManager.NavigateTo("/AllUsers");
+            return;
+        }
+
+        await userService.DeleteById(id);
+
+        await JsRuntime.InvokeVoidAsync("alert","The user was successfully deleted!");
+
+        _navigationManager.NavigateTo("/AllUsers", forceLoad: true);
+    }
+
+    private void Cancel()
+    {
+        _navigationManager.NavigateTo("/AllUsers");
+    }
+
+    private void isActiveToggle()
+    {
+        user.isActive = !user.isActive;
+    }
+}

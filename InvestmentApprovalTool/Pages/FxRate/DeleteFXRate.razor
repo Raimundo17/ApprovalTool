@@ -1,0 +1,52 @@
+﻿@page "/fxrate/delete/{Id:int}/{FXRateValue}"
+
+<h2>Delete FX Rate</h2>
+<br />
+
+<div class="col-lg-6">
+    <h4>Do you want to delete this FX Rate?</h4>
+    <hr />
+    <div class="mb-3 row g-3">
+        <h6 style="font-size:xx-large" class="col-7 col-form-label">@FXRateValue</h6>
+    </div>
+    <div class="row gx-5">
+        <button type="submit" class="col-sm-12 col-6 btn btn-danger" @onclick="(async () => await RemoveFXRate(FxRate))">Delete</button>
+        <div>&nbsp</div>
+        <button type="submit" class="col-sm-12 col-6 btn btn-warning" @onclick="Cancel">Cancel</button>
+    </div>
+</div>
+<br />
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    [Parameter]
+    public string FXRateValue { get; set; }
+    FXRate FxRate = new FXRate();
+    [CascadingParameter]
+    protected User currentUser { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Só os admins podem aceder
+        if (currentUser.IsAdmin == true && currentUser.isActive == true)
+        {
+            FxRate = await fxServices.GetById(Id);
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+    }
+    protected async Task RemoveFXRate(FXRate fXRate)
+    {
+        await fxServices.Delete(fXRate);
+        await JsRuntime.InvokeVoidAsync("alert", "FX Rate of value " + FxRate.FXRateValue + " was sucessfully deleted!");
+        _navigationManager.NavigateTo("/AllFXRate");
+    }
+    void Cancel()
+    {
+        _navigationManager.NavigateTo("/AllFXRate");
+    }
+}

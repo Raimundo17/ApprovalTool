@@ -1,0 +1,92 @@
+﻿@page "/user/delete/{Id:int}"
+
+<br />
+<h3>Are you sure you want to delete this user?</h3>
+<br />
+
+<div class="table-responsive">
+    <table class="table table-bordered p-0" id="dataTable" width="100%" cellspacing="0">
+        <thead style="text-align:center">
+            <tr>
+                <th>NetId</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Country</th>
+                <th>Plant</th>
+                <th>IsActive</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                <tr style="text-align:center">
+                    <td>@user.NetId</td>
+                    <td>@user.Name</td>
+                    <td>@user.Email</td>
+                    <td>@user.Role.Description</td>
+                    @{
+
+                        if (user.CountryId == null)
+                        {
+                            <td>N/A</td>
+                        }
+                        else
+                        {
+                            <td>@user.Country.CountryName</td>
+                        }
+
+                        if (user.PlantId == null)
+                        {
+                            <td>N/A</td>
+                        }
+                        else
+                        {
+                            <td>@user.Plant.PlantName</td>
+                        }
+                    }
+                    <td>@user.isActive.ToString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="form-group">
+    <input type="submit" value="Delete" @onclick="(async () => await RemoveUser(user))" class="btn btn-danger" />
+    <input type="submit" value="Cancel" @onclick="(() => Cancel())" class="btn btn-warning" />
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    User user = new User();
+    [CascadingParameter]
+    protected User currentUser { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Só os admins podem aceder
+        if (currentUser.IsAdmin == true)
+        {
+            user = await userService.GetbyId(Id);
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+    }
+
+    protected async Task RemoveUser(User user)
+    {
+        await userService.Delete(user);
+        await JsRuntime.InvokeVoidAsync("alert", "User " + user.Name + " was sucessfully deleted!");
+        _navigationManager.NavigateTo("/AllUsers");
+    }
+    void Cancel()
+    {
+        _navigationManager.NavigateTo("/AllUsers");
+    }
+
+
+}

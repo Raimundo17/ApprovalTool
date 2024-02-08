@@ -1,0 +1,98 @@
+﻿<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href=""><img width="180" height="50" src="" /></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav">
+            <li>
+                <a class="nav-link" href="">Pending Investments<span class="sr-only"></span></a>
+            </li>
+            <li>
+                <a class="nav-link" href="/AllInvestments">Investments History</a>
+            </li>
+            @{
+                if (currentUser.RoleId == 2)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" href="/AddInvestments">Create an Investment</a>
+                    </li>
+                }
+            }
+            <li class="nav-item">
+                <a class="nav-link" href="about">Contact</a>
+            </li>
+            @if (currentUser.IsAdmin == true)
+            {
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Admin Management
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="/AllCountries">Countries</a>
+                        <a class="dropdown-item" href="/AllPlants">Plants</a>
+                        <a class="dropdown-item" href="/AllFXRate">FX Rate</a>
+                        <a class="dropdown-item" href="/AllProjectTypes">Project Type</a>
+                        <a class="dropdown-item" href="/AllDocTypes">Document Type</a>
+                        <a class="dropdown-item" href="/AllUsers">Users</a>
+                        <a class="dropdown-item" href="/GlobalInvestments"> All Investments</a>
+                        <a class="dropdown-item" href="/Reports">Reports</a>
+                       <a class="dropdown-item" @onclick="() => SendEmail()">Send Email</a>
+                    </div>
+                </li>
+            }
+            <li class="nav-item">
+                <a class="nav-link">Welcome @currentUser.Name</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+@code {
+    [Parameter] public User currentUser { get; set; }
+    [Parameter] public List<Investments> Allinvestments { get; set; }
+
+    protected async Task SendEmail()
+    {
+
+        await MailService.MailTest();
+
+
+    }
+
+    public async Task ExportCSV()
+    {
+        Allinvestments = investmentServices.GetAll();
+
+#if DEBUG
+    String file = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\ExportFile.csv";
+#elif DEVELOPMENT
+    String file = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\ExportFile.csv";
+#else
+        String file = @"\\10.192.40.71\www\Lisbon\Investment_Approval_Tool\wwwroot\ExportFile.csv";
+#endif
+        String separator = ",";
+        StringBuilder output = new StringBuilder();
+
+        String[] headings = { "IssueDate", "ArNumber", "IR_DRNumber", "ProjectTitle_DisposalDescription", "IRValueEuro", "IRValueDollar", };
+        output.AppendLine(string.Join(separator, headings));
+
+        foreach (Investments investment in Allinvestments)
+        {
+            String[] newLine = { investment.IssueDate.ToString(), investment.ArNumber, investment.IR_DRNumber, investment.ProjectTitle_DisposalDescription, investment.IRValueEuro.ToString(), investment.IRValueDollar.ToString() };
+            output.AppendLine(string.Join(separator, newLine));
+        }
+
+        try
+        {
+            File.AppendAllText(file, output.ToString());
+        }
+        catch (Exception ex)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "There was a problem creating the CSV File!");
+            return;
+        }
+
+        await JsRuntime.InvokeVoidAsync("alert", "The data has been successfully saved to the CSV file!");
+    }
+}

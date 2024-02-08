@@ -1,0 +1,75 @@
+﻿@page "/AddDocType"
+@page "/doctype/edit/{Id:int}"
+
+<h3>@Title a Document Type</h3>
+<br />
+
+<EditForm Model="@docType" OnValidSubmit="SaveDocType">
+    <DataAnnotationsValidator />
+    <div class="col-lg-6">
+        <div class="mb-3 row g-3">
+            <label for="Description" class="col-3 col-form-label">Description</label>
+            <InputText id="Description" class="col-7 form-control" @bind-Value="docType.Description" />
+        </div>
+        <div class="row gx-5">
+            <button type="submit" class="col btn btn-primary">Save</button>
+            <div>&nbsp</div>
+            <button type="button" class="col btn btn-primary" @onclick="Cancel">Cancel</button>
+        </div>
+        <ValidationMessage For="@(() => docType.Description)" />
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    [CascadingParameter]
+    protected User currentUser { get; set; }
+    protected DocType docType = new DocType();
+    protected string Title = "";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Só os admins podem aceder
+        if (currentUser.IsAdmin == true && currentUser.isActive == true)
+        {
+
+            if (Id != 0)
+            {
+                Title = "Edit";
+                docType = await doctypeService.GetById(Id);
+            }
+            else
+            {
+                Title = "Add";
+            }
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+    }
+
+    protected async Task SaveDocType()
+    {
+        if (docType.Id != 0)
+        {
+            await doctypeService.Update(docType);
+            await JsRuntime.InvokeVoidAsync("alert", "Doc Type " + docType.Description + " was sucessfully edited!");
+        }
+        else
+        {
+            await doctypeService.Create(docType);
+            await JsRuntime.InvokeVoidAsync("alert", "Doc Type " + docType.Description + " was sucessfully created!");
+        }
+
+        _navigationManager.NavigateTo("/AllDocTypes");
+    }
+
+    public void Cancel()
+    {
+        _navigationManager.NavigateTo("/AllDocTypes");
+    }
+
+}

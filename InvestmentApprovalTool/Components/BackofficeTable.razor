@@ -1,0 +1,63 @@
+﻿@typeparam Titem
+
+<br />
+<div class="table-responsive">
+    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+        <thead style="text-align:center">
+            <tr>
+                <th>@Title</th>
+                <th>Manage</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                foreach (var item in EntityList)
+                {
+                    <tr style="text-align:center">
+                        @if (Title == "Plant")
+                        {
+                            <td>@item.GetType().GetProperties().ElementAt(3).GetValue(item)</td>
+                        }
+                        else
+                        {
+                            <td>@item.GetType().GetProperties().ElementAt(1).GetValue(item)</td>
+                        }
+
+                        <td>
+                            <a href='/@Title.ToLower()/edit/@item.GetType().GetProperty("Id").GetValue(item).ToString()' class="btn btn-outline-dark" role="button">
+                                Edit
+                            </a>
+                            <a href='/@Title.ToLower()/delete/@item.GetType().GetProperty("Id").GetValue(item).ToString();/@item.GetType().GetProperties().ElementAt(1).Name' class="btn btn-outline-danger" role="button">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@code {
+    public string Id { get; set; }
+    public string Description { get; set; }
+    public string Title { get; set; }
+
+    [Parameter] public List<Titem> EntityList { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        foreach (var item in EntityList)
+        {
+            string type = item.GetType().ToString().Substring(28);
+            Title = type;
+
+            // var value = item.GetType().GetProperties();
+            // var propertyDescription = value.ElementAt(1);
+            // Description = propertyDescription.Name;
+        }
+
+
+    }
+}

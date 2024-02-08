@@ -1,0 +1,120 @@
+﻿@page "/AllInvestments"
+
+<div class="row">
+    <div class="col-10"><h3>Investments History</h3></div>
+</div>
+<br />
+
+@if (investmentsList.Count != 0)
+{
+    <input type="submit" style="margin-right:10px" class="btn btn-primary" value="Check previous investments" @onclick="() => LoadPreviousInvestments()" />
+
+    <br />
+
+    <br />
+
+    <InvestmentsTable investments="@investments" investmentsList="investmentsList"></InvestmentsTable>
+}
+else
+{
+    <div><h3>There are no investments</h3></div>
+}
+
+@code {
+    protected List<Investments> investmentsList = new();
+    protected Investments investments = new();
+    [CascadingParameter] protected User currentUser { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (currentUser.isActive == false)
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+
+        if (currentUser.RoleId > 1 && currentUser.RoleId < 7)
+        {
+            if (currentUser.RoleId == 2)
+            {
+                investmentsList = await investmentServices.GetInvestmentsHistoryRequesterCountryActualYear(currentUser.CountryId.Value);
+              //   investmentsList = await investmentServices.GetInvestmentsHistoryRequesterCountry(currentUser.CountryId.Value);
+            }
+            else
+            {
+                List<User> otherme = new List<User>();
+                otherme = await userService.GetUserByNetIdList(currentUser.NetId);
+
+                foreach (var user in otherme)
+                {
+                    // Need to see if all the users of that same user are from MEC to beyond (MEC to Krakow dont have plantid)
+                    if (user.CountryId != null)
+                    {
+                        List<Investments> x = await investmentServices.GetInvestmentsHistoryByPlantActualYear(user.RoleId, user.PlantId.Value);
+                      //   List<Investments> x = await investmentServices.GetInvestmentsHistoryByPlant(user.RoleId, user.PlantId.Value);
+                        foreach (var item in x)
+                        {
+                            investmentsList.Add(item);
+                        }
+                    }
+                    else
+                    {
+                        List<Investments> x = await investmentServices.GetInvestmentsHistoryActualYear(currentUser.RoleId);
+                       //  List<Investments> x = await investmentServices.GetInvestmentsHistory(currentUser.RoleId);
+                        foreach (var item in x)
+                        {
+                            investmentsList.Add(item);
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            investmentsList = await investmentServices.GetInvestmentsHistoryActualYear(currentUser.RoleId);
+          //   investmentsList = await investmentServices.GetInvestmentsHistory(currentUser.RoleId);
+        }
+    }
+
+    protected async Task LoadPreviousInvestments()
+    {
+        if (currentUser.RoleId > 1 && currentUser.RoleId < 7)
+        {
+            if (currentUser.RoleId == 2)
+            {
+                investmentsList = await investmentServices.GetInvestmentsHistoryRequesterCountry(currentUser.CountryId.Value);
+            }
+            else
+            {
+                List<User> otherme = new List<User>();
+                otherme = await userService.GetUserByNetIdList(currentUser.NetId);
+
+                foreach (var user in otherme)
+                {
+                    // Need to see if all the users of that same user are from MEC to beyond (MEC to Krakow dont have plantid)
+                    if (user.CountryId != null)
+                    {
+                        List<Investments> x = await investmentServices.GetInvestmentsHistoryByPlant(user.RoleId, user.PlantId.Value);
+                        foreach (var item in x)
+                        {
+                            investmentsList.Add(item);
+                        }
+                    }
+                    else
+                    {
+                        List<Investments> x = await investmentServices.GetInvestmentsHistory(currentUser.RoleId);
+                        foreach (var item in x)
+                        {
+                            investmentsList.Add(item);
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            investmentsList = await investmentServices.GetInvestmentsHistory(currentUser.RoleId);
+        }
+    }
+}

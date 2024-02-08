@@ -1,0 +1,33 @@
+﻿@page "/AllDocTypes"
+
+<div class="row">
+    <div class="col-10"><h3>Document Type Management</h3></div>
+    <div class="col-2">
+        <a href='AddDocType' class="btn btn-primary" role="button">
+            <i class="fas fa-user-plus"></i>
+            Add Document Type
+        </a>
+    </div>
+</div>
+
+<BackofficeTable EntityList="@doctypeList"></BackofficeTable>
+
+@code {
+    protected List<DocType> doctypeList = new();
+    protected DocType docType = new();
+    [CascadingParameter]
+    protected User currentUser { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (currentUser.IsAdmin == true && currentUser.isActive == true)
+        {
+            doctypeList = await doctypeService.GetAll();
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+    }
+}

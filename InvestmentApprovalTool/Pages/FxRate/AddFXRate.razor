@@ -1,0 +1,74 @@
+﻿@page "/AddFXRate"
+@page "/fxrate/edit/{Id:int}"
+
+<h3>@Title a new FX Rate</h3>
+<br />
+
+<EditForm Model="@fxrate" OnValidSubmit="SaveFXRate">
+    <DataAnnotationsValidator />
+    <div class="col-lg-6">
+        <div class="mb-3 row g-3">
+            <label for="fxValue" class="col-3 col-form-label">FX Rate Value</label>
+            <InputNumber id="fxValue" class="col-7 form-control" min="1" max="999" @bind-Value="fxrate.FXRateValue" />
+        </div>
+        <div class="row gx-5">
+            <button type="submit" class="col btn btn-primary">Save</button>
+            <div>&nbsp</div>
+            <button type="button" class="col btn btn-primary" @onclick="Cancel">Cancel</button>
+        </div>
+        <ValidationMessage For="@(() => fxrate.FXRateValue)" />
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    protected FXRate fxrate = new FXRate();
+    protected string Title = "";
+    [CascadingParameter]
+    protected User currentUser { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Só os admins podem aceder
+        if (currentUser.IsAdmin == true && currentUser.isActive == true)
+        {
+            if (Id != 0)
+            {
+                Title = "Edit";
+                fxrate = await fxServices.GetById(Id);
+            }
+            else
+            {
+                Title = "Add";
+            }
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+    }
+
+    protected async Task SaveFXRate()
+    {
+        if (fxrate.Id != 0)
+        {
+            await fxServices.Update(fxrate);
+            await JsRuntime.InvokeVoidAsync("alert", "FX Rate of value " + fxrate.FXRateValue + " was sucessfully edited!");
+        }
+        else
+        {
+            await fxServices.Create(fxrate);
+            await JsRuntime.InvokeVoidAsync("alert", "FX Rate of value " + fxrate.FXRateValue + " was sucessfully created!");
+        }
+
+        _navigationManager.NavigateTo("/AllFXRate");
+    }
+
+    public void Cancel()
+    {
+        _navigationManager.NavigateTo("/AllFXRate");
+    }
+
+}

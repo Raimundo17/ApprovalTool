@@ -1,0 +1,56 @@
+﻿@inherits LayoutComponentBase
+
+@inject IMailService _mail
+@inject IInvestmentService _investment
+@inject IUserService _user
+
+<PageTitle>InvestmentApprovalTool</PageTitle>
+
+<Navbar currentUser=currentUser Allinvestments=Allinvestments></Navbar>
+
+<article class="content px-4">
+
+    <CascadingValue Value="@currentUser">
+        @Body
+    </CascadingValue>
+</article>
+
+
+@code {
+    public User currentUser { get; set; }
+    private string? userName = string.Empty;
+    protected List<Investments> Allinvestments = new();
+    private bool IsUserRegistred { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await _authProvider.GetAuthenticationStateAsync();
+
+        var userxxxxxxxId = auth.User.Identity.Name;
+        var cleanxxxxxxxId = userxxxxxxxId.Replace("xxxxxxx\\", "");
+
+        currentUser = _context.Users.Where(u => u.NetId == cleanxxxxxxxId && u.isActive == true).FirstOrDefault();
+
+        if(currentUser != null)
+        {
+            await authServices.isRegistred(cleanxxxxxxxId);
+            await userService.SetUserbyNetId(cleanxxxxxxxId);
+
+            currentUser = await userService.GetbyNetId(cleanxxxxxxxId);
+
+            if (await authServices.GetUserIsRegistred())
+            {
+                userName = currentUser.Name;
+            }
+            else
+            {
+                currentUser = null;
+            }
+        }
+        else
+        {
+            currentUser = new User();
+        }
+
+    }
+}

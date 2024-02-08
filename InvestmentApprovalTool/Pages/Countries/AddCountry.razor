@@ -1,0 +1,75 @@
+﻿@page "/AddCountry"
+@page "/country/edit/{Id:int}"
+
+<h3>@Title a Country</h3>
+<br />
+
+<EditForm Model="@country" OnValidSubmit="SaveCountry">
+    <DataAnnotationsValidator />
+    <div class="col-lg-6">
+        <div class="mb-3 row g-3">
+            <label for="CountryName" class="col-3 col-form-label">Country Name</label>
+            <InputText id="CountryName" class="col-7 form-control" @bind-Value="country.CountryName" />
+        </div>
+        <div class="row gx-5">
+            <button type="submit" class="col btn btn-primary">Save</button>
+            <div>&nbsp</div>
+            <button type="button" class="col btn btn-primary" @onclick="Cancel">Cancel</button>
+        </div>
+        <ValidationMessage For="@(() => country.CountryName)" />
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    [CascadingParameter]
+    protected User currentUser { get; set; }
+    protected Country country = new Country();
+    protected string Title = "";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Só os admins podem aceder
+        if (currentUser.IsAdmin == true && currentUser.isActive == true)
+        {
+
+            if (Id != 0)
+            {
+                Title = "Edit";
+                country = await countryServices.GetById(Id);
+            }
+            else
+            {
+                Title = "Add";
+            }
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+    }
+
+    protected async Task SaveCountry()
+    {
+        if (country.Id != 0)
+        {
+            await countryServices.Update(country);
+            await JsRuntime.InvokeVoidAsync("alert", "Country " + country.CountryName + " was sucessfully edited!");
+        }
+        else
+        {        
+            await countryServices.Create(country);
+            await JsRuntime.InvokeVoidAsync("alert", "Country " + country.CountryName + " was sucessfully created!");
+        }
+
+        _navigationManager.NavigateTo("/AllCountries");
+    }
+
+    public void Cancel()
+    {
+        _navigationManager.NavigateTo("/AllCountries");
+    }
+
+}

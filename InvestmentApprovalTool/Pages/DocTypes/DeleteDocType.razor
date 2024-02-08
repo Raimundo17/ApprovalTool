@@ -1,0 +1,53 @@
+﻿@page "/doctype/delete/{Id:int}/{Description}"
+
+<h3>Delete Doc Type</h3>
+<br />
+
+<div class="col-lg-6">
+    <h4>Do you want to delete this document type?</h4>
+    <hr />
+    <div class="mb-3 row g-3">
+        <h6 style="font-size:xx-large" class="col-7 col-form-label">@Description</h6>
+    </div>
+    <div class="row gx-5">
+        <button type="submit" class="col-sm-12 col-6 btn btn-danger" @onclick="(async () => await RemoveDocType(docType))">Delete</button>
+        <div>&nbsp</div>
+        <button type="submit" class="col-sm-12 col-6 btn btn-warning" @onclick="Cancel">Cancel</button>
+    </div>
+</div>
+<br />
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    [Parameter]
+    public string Description { get; set; }
+    DocType docType = new DocType();
+    [CascadingParameter]
+    protected User currentUser { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Só os admins podem aceder
+        if (currentUser.IsAdmin == true && currentUser.isActive == true)
+        {
+            docType = await doctypeService.GetById(Id);
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+    }
+
+    protected async Task RemoveDocType(DocType docType)
+    {
+        await doctypeService.Delete(docType);
+        await JsRuntime.InvokeVoidAsync("alert", "Doc Type " + docType.Description + " was sucessfully deleted!");
+        _navigationManager.NavigateTo("/AllDocTypes");
+    }
+    void Cancel()
+    {
+        _navigationManager.NavigateTo("/AllDocTypes");
+    }
+}

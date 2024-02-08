@@ -1,0 +1,204 @@
+﻿@page "/AddUser"
+@page "/user/edit/{Id:int}"
+
+@inherits CascadingDropdownComponentBase
+
+<h3>@Title a User</h3>
+<hr />
+
+<EditForm Model="@user" OnValidSubmit="SubmitUser">
+    <DataAnnotationsValidator />
+    <div class="col-lg-7">
+        <div class="user">
+            <div class="form-group row">
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                    Name
+                    <InputText class="col-7 form-control" @bind-Value="user.Name" />
+                    <ValidationMessage For="@(() => user.Name)" />
+                </div>
+                <br />
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                    Select a role:
+                    <InputSelect class="form-control" @bind-Value="user.RoleId">
+                        @foreach (var role in roles)
+                        {
+                            <option value="@role.Id">@role.Description</option>
+                        }
+                    </InputSelect>
+                </div>
+                <br />
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                    Country
+                    <InputSelect id="Countries" class="form-control"
+                                 ValueExpression="@(() => CascadingVM.CountryId)"
+                                 Value="@CascadingVM.CountryId"
+                                 ValueChanged="@((string value) => OnCountryChange(value))">
+                        @foreach (var country in CascadingVM.ListofCountries)
+                        {
+                            if (country.Value == user.CountryId.ToString())
+                            {
+                                <option selected value="@country.Value">@country.Text</option>
+                                CountryId = CascadingVM.CountryId;
+                            }
+                            else
+                            {
+                                <option value="@country.Value">@country.Text</option>
+                                CountryId = CascadingVM.CountryId;
+                            }
+                        }
+                    </InputSelect>
+                    Plant
+                    <InputSelect id="Plant" class="form-control"
+                                 ValueExpression="@(() => CascadingVM.PlantId)"
+                                 Value="@CascadingVM.PlantId"
+                                 ValueChanged="@((string value) => OnPlantChange(value))">
+                        @if (CascadingVM.ListofPlants != null)
+                        {
+                            @foreach (var plant in CascadingVM.ListofPlants)
+                            {
+                                if (plant.Value == user.PlantId.ToString())
+                                {
+                                    <option selected value="@plant.Value">@plant.Text</option>
+                                    PlantId = CascadingVM.PlantId;
+                                }
+                                else
+                                {
+                                    <option value="@plant.Value">@plant.Text</option>
+                                    PlantId = CascadingVM.PlantId;
+                                }
+                            }
+                        }
+                    </InputSelect>
+                </div>
+                <br />
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                    NET ID
+                    <InputText class="col-7 form-control" @bind-Value="user.NetId" />
+                    <ValidationMessage For="@(() => user.Name)" />
+                </div>
+
+
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                    Email
+                    <InputText class="col-7 form-control" @bind-Value="user.Email" />
+                    <ValidationMessage For="@(() => user.Email)" />
+                </div>
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                    Is Active?
+                    <InputCheckbox @bind-Value="user.isActive" />
+                </div>
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                    Is Admin?
+                    <InputCheckbox @bind-Value="@isAdmin" />
+                </div>
+            </div>
+
+        </div>
+        <input type="submit" style="margin-right:10px" class="btn btn-outline-info" @onclick="() => SubmitUser()" value="Create/Save" />
+
+        <input type="button" class="btn btn-outline-danger" @onclick="Cancel" value="Cancel" />
+    </div>
+</EditForm>
+
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    protected string Title = "";
+    protected User user = new User();
+    public string? CountryId { get; set; }
+    public string? PlantId { get; set; }
+    protected List<Role> roles = new List<Role>();
+    protected List<Country> countries = new List<Country>();
+    protected List<Plant> plants = new List<Plant>();
+    [CascadingParameter]
+    protected User currentUser { get; set; }
+
+    public bool isAdmin { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        
+        isAdmin = currentUser.IsAdmin ?? false;
+
+        // Só os admins podem aceder
+        if (currentUser.IsAdmin == true)
+        {
+            roles = await roleServices.GetAll();
+            countries = await countryServices.GetAll();
+            plants = await plantService.GetAll();
+
+            if (Id != 0)
+            {
+                Title = "Edit";
+                user = await userService.GetbyId(Id);
+
+        if(user.Id != null)
+        {
+            if(user.IsAdmin == true)
+            {
+                isAdmin = true;
+            }
+            else if(user.IsAdmin == false)
+            {
+                isAdmin = false;            
+            }
+        }
+
+            }
+            else
+            {
+                Title = "Add";
+            }
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+    }
+
+    protected async Task SubmitUser()
+    {       
+        if (CountryId == "")
+        {
+            user.CountryId = null;
+
+        }
+        else
+        {
+            user.CountryId = Convert.ToInt32(CountryId);
+
+        }
+
+        if (PlantId == "")
+        {
+            user.PlantId = null;
+        }
+        else
+        {
+            user.PlantId = Convert.ToInt32(PlantId);
+        }
+
+        user.IsAdmin = isAdmin;
+        await userService.SubmitUser(user);
+
+        _navigationManager.NavigateTo("/AllUsers");
+    }
+
+    private void Cancel()
+    {
+        _navigationManager.NavigateTo("/AllUsers");
+    }
+
+    private void isActiveToggle()
+    {
+        user.isActive = !user.isActive;
+    }
+
+     private void isAdminToggle()
+    {
+        user.IsAdmin = !user.IsAdmin;
+    }
+}

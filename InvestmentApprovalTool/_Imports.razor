@@ -1,0 +1,53 @@
+﻿@using System.Net.Http
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using InvestmentApprovalTool
+@using InvestmentApprovalTool.Shared
+@using InvestmentApprovalTool.Services
+@using System.Text
+@using Blazored  
+@using Blazored.Modal  
+@using Blazored.Modal.Services
+@using System.Diagnostics
+@using InvestmentApprovalTool.Data
+@using InvestmentApprovalTool.Components
+@using Microsoft.AspNetCore.Mvc
+@using BlazorTable
+@using System.Globalization
+@using PdfSharp.Pdf
+@using Hangfire
+@using PdfSharp.Drawing
+@using BlazorBootstrap;
+@using System.Drawing;
+@using Radzen
+@using Radzen.Blazor
+@using Pages
+
+@inject IHttpContextAccessor httpContextAccessor
+@inject IUserService userService
+@inject IInvestmentService investmentServices
+@inject NavigationManager _navigationManager
+@inject DataContext _context
+@inject IMailService mailService
+@inject IModalService modal
+@inject IJSRuntime JsRuntime
+@inject ISentMailService MailService
+@inject IInvestmentHistoryService investmenthistoryService
+@inject ICommentService commentService
+@inject IHistoricDocumentService historicdocumentService
+@inject IProjectTypeService projecttypeService
+@inject IDocTypeService doctypeService
+@inject IFXRateService fxRateService
+@inject IDropdownService DropdownService
+@inject IBackgroundJobClient BackGroundJob
+@inject ICountryService countryServices
+@inject IFXRateService fxServices
+@inject IPlantService plantService
+@inject IRoleService roleServices
+@inject IAuthService authServices
+@inject AuthenticationStateProvider _authProvider

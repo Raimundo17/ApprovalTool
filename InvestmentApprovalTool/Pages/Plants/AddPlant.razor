@@ -1,0 +1,74 @@
+﻿@page "/AddPlant"
+@page "/plant/edit/{Id:int}"
+
+<h3>@Title a Plant</h3>
+<br />
+
+<EditForm Model="@plant" OnValidSubmit="SavePlant">
+    <DataAnnotationsValidator />
+    <div class="col-lg-6">
+        <div class="mb-3 row g-3">
+            <label for="fxValue" class="col-3 col-form-label">Plant Name</label>
+             <InputText class="col-7 form-control" @bind-Value="plant.PlantName" />
+        </div>
+        <div class="row gx-5">
+            <button type="submit" class="col btn btn-primary">Save</button>
+            <div>&nbsp</div>
+            <button type="button" class="col btn btn-primary" @onclick="Cancel">Cancel</button>
+        </div>
+        <ValidationMessage For="@(() => plant.PlantName)" />
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    protected string Title = "";
+    protected Plant plant = new Plant();
+    [CascadingParameter]
+    protected User currentUser { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Só os admins podem aceder
+        if (currentUser.IsAdmin == true && currentUser.isActive == true)
+        {
+            if (Id != 0)
+            {
+                Title = "Edit";
+                plant = await plantService.GetById(Id);
+            }
+            else
+            {
+                Title = "Add";
+            }
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+    }
+
+    protected async Task SavePlant()
+    {
+        if (plant.Id != 0)
+        {
+            await plantService.Update(plant);
+            await JsRuntime.InvokeVoidAsync("alert", "Plant " + plant.PlantName + " was sucessfully edited!");
+        }
+        else
+        {
+            await plantService.Create(plant);
+            await JsRuntime.InvokeVoidAsync("alert", "Plant " + plant.PlantName + " was sucessfully created!");
+        }
+
+        _navigationManager.NavigateTo("/AllPlants");
+    }
+
+    public void Cancel()
+    {
+        _navigationManager.NavigateTo("/AllPlants");
+    }
+
+}

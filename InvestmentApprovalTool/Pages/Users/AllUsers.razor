@@ -1,0 +1,160 @@
+﻿@page "/AllUsers"
+
+<div class="row">
+    <div class="col-10"><h3>Users Management</h3></div>
+    <div class="col-2">
+        <a href='addUser' class="btn btn-primary" role="button">
+            <i class="fas fa-user-plus"></i>
+            Add User
+        </a>
+    </div>
+</div>
+
+<br />
+
+@if (UsersList != null)
+{
+    foreach (var item in UsersList)
+    {
+        _context.Entry(item).Reference(_user => _user.Role).Load();
+        _context.Entry(item).Reference(_user => _user.Country).Load();
+        _context.Entry(item).Reference(_user => _user.Plant).Load();
+    }
+
+    <h2>From Requesters to Plant General Management Approvers</h2>
+
+    <Table TableItem="TableData" Items="listtabledata" align="center" PageSize="15">
+        <Column TableItem="TableData" Title="Plant" Field="@(x => x.PlantName)" Sortable="true" Align="Align.Center" Filterable="true" Width="auto" />
+        <Column TableItem="TableData" Title="Requester" Field="@(x => x.RequesterName)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+        <Column TableItem="TableData" Title="Plant Me" Field="@(x => x.PlantMEName)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+        <Column TableItem="TableData" Title="Cluster Me" Field="@(x => x.ClusterMEName)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+        <Column TableItem="TableData" Title="Plant Finance" Field="@(x => x.PlantFinanceName)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+        <Column TableItem="TableData" Title="Plant General Management" Field="@(x => x.PlantGeneralManagementName)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+        <Column TableItem="TableData" Context="_context" Title="Manage" Width="auto">
+            <Template>
+                @{
+                    var parameters = new ModalParameters
+            {
+            { nameof(_context.plantId), _context.plantId },
+            {   nameof(currentUser.NetId), currentUser.NetId }
+            };
+
+                    var options = new ModalOptions()
+                    {
+                        Size = Blazored.Modal.ModalSize.Custom,
+                        SizeCustomClass = "1000px"
+                    };
+
+
+                    <a @onclick="@(()=>modal.Show<PlantDetail>(currentUser.NetId,parameters,options))" class="btn btn-outline-info">Plant-User Details</a>
+                }
+
+            </Template>
+        </Column>
+        <Pager AlwaysShow="true" ShowPageSizes="true" ShowTotalCount="true" ShowPageNumber="true"></Pager>
+    </Table>
+}
+else
+{
+    <div class="well col-md-12">
+        <h3> Loading Users List</h3>
+    </div>
+}
+
+<h2>From MEC TO Krakow Finance Team Approvers</h2>
+
+<br />
+
+<Table TableItem="User" Items="HighApprovalList" PageSize="15">
+    <Column TableItem="User" Title="Net Id" Field="@(x => x.NetId)" Sortable="true" Align="Align.Center" Filterable="true" Width="auto" />
+    <Column TableItem="User" Title="Name" Field="@(x => x.Name)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+    <Column TableItem="User" Title="Role" Field="@(x => x.Role.Description)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+    <Column TableItem="User" Title="Is Active?" Field="@(x => x.isActive)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+        <Column TableItem="User" Title="Is Admin?" Field="@(x => x.IsAdmin)" Sortable="true" Filterable="true" Align="Align.Center" Width="auto" />
+    <Column TableItem="User" Context="_context" Title="Manage" Width="auto">
+        <Template>
+            <a href='/user/edit/@_context.Id' class="btn btn-outline-success" role="button">
+                Edit
+            </a>
+            <a href='/user/delete/@_context.Id' class="btn btn-outline-danger" role="button">
+                Delete
+            </a>
+        </Template>
+    </Column>
+    <Pager AlwaysShow="true" ShowPageSizes="true" ShowTotalCount="true" ShowPageNumber="true"></Pager>
+</Table>
+
+@code {
+    protected List<User> UsersList = new List<User>();
+    protected List<User> HighApprovalList = new List<User>();
+    protected List<Plant> PlantList = new();
+    protected Plant Plant { get; set; }
+    [CascadingParameter]
+    protected User currentUser { get; set; }
+
+    List<TableData> listtabledata = new List<TableData>();
+
+    private class TableData
+    {
+        [CascadingParameter]
+        public string plantId { get; set; }
+
+        public string PlantName { get; set; }
+
+        public string RequesterName { get; set; }
+
+        public string RequesterNameFalses { get; set; }
+
+        public string PlantMEName { get; set; }
+        public string PlantMENameFalses { get; set; }
+
+        public string ClusterMEName { get; set; }
+        public string ClusterMENameFalses { get; set; }
+
+        public string PlantFinanceName { get; set; }
+        public string PlantFinanceNameFalses { get; set; }
+
+        public string PlantGeneralManagementName { get; set; }
+        public string PlantGeneralManagementNameFalses { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Só os admins podem aceder
+        if (currentUser.IsAdmin == true)
+        {
+            UsersList = await userService.GetAll();
+            PlantList = await plantService.GetAll();
+
+            var filteredUsers = UsersList.Where(user =>
+new[] { 1,7, 8, 9, 10, 11, 12, 13, 14, 15 }.Contains(user.RoleId)
+).ToList();
+
+            HighApprovalList = filteredUsers;
+
+            foreach (var plant in PlantList)
+            {
+                listtabledata.Add(new TableData
+                    {
+                        plantId = plant.Id.ToString(),
+                        PlantName = plant.PlantName,
+                        RequesterName = UsersList.FirstOrDefault(u => u.RoleId == 2 && u.PlantId == plant.Id && u.isActive == true)?.Name,
+                        RequesterNameFalses = UsersList.FirstOrDefault(u => u.RoleId == 2 && u.PlantId == plant.Id && u.isActive == false)?.Name,
+                        PlantMEName = UsersList.FirstOrDefault(u => u.RoleId == 3 && u.PlantId == plant.Id && u.isActive == true)?.Name,
+                        PlantMENameFalses = UsersList.FirstOrDefault(u => u.RoleId == 3 && u.PlantId == plant.Id && u.isActive == false)?.Name,
+                        ClusterMEName = UsersList.FirstOrDefault(u => u.RoleId == 4 && u.PlantId == plant.Id && u.isActive == true)?.Name,
+                        ClusterMENameFalses = UsersList.FirstOrDefault(u => u.RoleId == 4 && u.PlantId == plant.Id && u.isActive == false)?.Name,
+                        PlantFinanceName = UsersList.FirstOrDefault(u => u.RoleId == 5 && u.PlantId == plant.Id && u.isActive == true)?.Name,
+                        PlantFinanceNameFalses = UsersList.FirstOrDefault(u => u.RoleId == 5 && u.PlantId == plant.Id && u.isActive == false)?.Name,
+                        PlantGeneralManagementName = UsersList.FirstOrDefault(u => u.RoleId == 6 && u.PlantId == plant.Id && u.isActive == true)?.Name,
+                        PlantGeneralManagementNameFalses = UsersList.FirstOrDefault(u => u.RoleId == 6 && u.PlantId == plant.Id && u.isActive == false)?.Name
+                    });
+            }
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+    }
+}

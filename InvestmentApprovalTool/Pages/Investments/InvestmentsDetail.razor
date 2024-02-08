@@ -1,0 +1,1985 @@
+﻿@page "/investments/details/{Id:int}"
+
+@inject NavigationManager navigationManager
+
+<h1>Details about request @investments.IR_DRNumber</h1>
+
+<div class="table-responsive">
+    <table class="table table-bordered p-0" id="dataTable" width="100%" cellspacing="0">
+        <thead>
+            <tr style="text-align:center">
+                <th>Issue Date</th>
+                <th>AR Number</th>
+                <th>IR DR Number</th>
+                <th>Project Type</th>
+                <th>Production Concept Change</th>
+                <th>Project Title</th>
+                <th>Requester</th>
+                <th>Country</th>
+                <th>Plant</th>
+                <th>IR/DR (€)</th>
+                <th>IR/DR ($) </th>
+                <th>Doc Type</th>
+                <th>Requester comments</th>
+                <th>Status</th>
+                <th>Reg.Number</th>
+                <th>Process Level</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="text-align:center">
+                @{
+                    _context.Entry(investments).Reference(_investments => _investments.Requester).Load();
+                }
+
+                <td>@investments?.IssueDate</td>
+                <td>@investments?.ArNumber</td>
+                <td>@investments?.IR_DRNumber</td>
+                <td>@investments?.ProjectType?.Description</td>
+                <td>@investments?.productionConceptChange</td>
+                <td>@investments?.ProjectTitle_DisposalDescription</td>
+                <td>@investments?.Requester?.Name</td>
+                <td>@investments?.Country?.CountryName</td>
+                <td>@investments?.Plant?.PlantName</td>
+                <td>@investments?.IRValueEuro.ToString("N0")</td>
+                <td>@investments?.IRValueDollar.ToString("N0")</td>
+                <td>@investments?.DocType?.Description</td>
+                <td>@investments?.Comments</td>
+                <td>@investments?.Status?.StatusDesignation</td>
+                <td>@investments.RegNumber</td>
+                <td>@investments?.ProcessLevel?.Description</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br />
+
+    <h4>Approver´s Commentary</h4>
+
+    <br />
+
+    <table class="table table-bordered p-0" id="dataTable" width="100%" cellspacing="0">
+        <tr>
+            @if (@approvercomment.Approver3Comment != null)
+            {
+                <th>@approvercomment.Approver3</th>
+                <td>@approvercomment.Approver3Comment</td>
+            }
+        </tr>
+        <tr>
+            @if (@approvercomment.Approver4Comment != null)
+            {
+                <th>@approvercomment.Approver4</th>
+                <td>@approvercomment.Approver4Comment</td>
+            }
+        </tr>
+        <tr>
+            @if (@approvercomment.Approver5Comment != null)
+            {
+                <th>@approvercomment.Approver5</th>
+                <td>@approvercomment.Approver5Comment</td>
+            }
+        </tr>
+        <tr>
+            @if (@approvercomment.Approver6Comment != null)
+            {
+                <th>@approvercomment.Approver6</th>
+                <td>@approvercomment.Approver6Comment</td>
+            }
+        </tr>
+        <tr>
+            @if (@approvercomment.Approver7Comment != null)
+            {
+                <th>@approvercomment.Approver7</th>
+                <td>@approvercomment.Approver7Comment</td>
+            }
+        </tr>
+        <tr>
+            @if (@approvercomment.Approver8Comment != null)
+            {
+                <th>@approvercomment.Approver8</th>
+                <td>@approvercomment.Approver8Comment</td>
+            }
+        </tr>
+        <tr>
+
+            @if (@approvercomment.Approver9Comment != null)
+            {
+                <th>@approvercomment.Approver9</th>
+                <td>@approvercomment.Approver9Comment</td>
+            }
+        </tr>
+        <tr>
+            @if (@approvercomment.Approver10Comment != null)
+            {
+                <th>@approvercomment.Approver10</th>
+                <td>@approvercomment.Approver10Comment</td>
+            }
+        </tr>
+        <tr>
+            @if (@approvercomment.Approver11Comment != null)
+            {
+                <th>@approvercomment.Approver11</th>
+                <td>@approvercomment.Approver11Comment</td>
+            }
+        </tr>
+        <tr>
+            @if (@approvercomment.Approver12Comment != null)
+            {
+                <th>@approvercomment.Approver12</th>
+                <td>@approvercomment.Approver12Comment</td>
+            }
+        </tr>
+        <tr>
+            @if (@approvercomment.Approver13Comment != null)
+            {
+                <th>@approvercomment.Approver13</th>
+                <td>@approvercomment.Approver13Comment</td>
+            }
+        </tr>
+        <tr>
+            @if (@approvercomment.Approver14Comment != null)
+            {
+                <th>@approvercomment.Approver14</th>
+                <td>@approvercomment.Approver14Comment</td>
+            }
+        </tr>
+        <tr>
+            @if (@approvercomment.Approver15Comment != null)
+            {
+                <th>@approvercomment.Approver15</th>
+                <td>@approvercomment.Approver15Comment</td>
+            }
+        </tr>
+    </table>
+
+    <br />
+
+    <h4>Documentation</h4>
+
+    <br />
+
+    <table class="table table-bordered p-0" id="dataTable" width="100%" cellspacing="0">
+        <thead>
+            <tr style="text-align:center">
+                <th>Investment Form</th>
+                <th>Disposal Form</th>
+                <th>MSD</th>
+                <th>Exception Letter</th>
+                <th>ECCLS</th>
+                <th>Rebill PO Sales</th>
+                <th>Others</th>
+                <th>Others/MEC</th>
+                <th>Others/CFI</th>
+                <th>Release Document</th>
+                <th>Historic of Approvers</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="text-align:center">
+                @{
+                    // ---------- INVESTMENT FORM ------------------------
+                    string investmentformpaths = "/Documentation/" + investments.Investment_Form;
+                    if (investments.Investment_Form == null)
+                    {
+                        <td>N/A</td>
+                    }
+                    else
+                    {
+                        <td><a style="cursor:pointer" href="@investmentformpaths" target="_blank"><iframe src='@investmentformpaths' style=" height:250px; width:250px ; border:hidden"></iframe><strong>Open</strong></a></td>
+                    }
+
+                    // ---------- DISPOSAL FORM ------------------------
+                    string disposalformPath = "/Documentation/" + investments.Disposal_Form;
+                    if (investments.Disposal_Form == null)
+                    {
+                        <td>N/A</td>
+
+                    }
+                    else
+                    {
+                        <td><a style="cursor:pointer" href="@disposalformPath" target="_blank"><iframe src='@disposalformPath' style=" height:250px; width:250px ; border:hidden"></iframe><strong>Open</strong></a></td>
+                    }
+
+                    // ---------- MSD ------------------------
+                    string MSDPath = "/Documentation/" + investments.MSD;
+                    if (investments.MSD == null)
+                    {
+                        <td>N/A</td>
+                    }
+                    else
+                    {
+                        <td><a style="cursor:pointer" href="@MSDPath" target="_blank"><iframe src='@MSDPath' style=" height:250px; width:250px ; border:hidden"></iframe><strong>Open</strong></a></td>
+                    }
+
+                    // ---------- EXCEPTION LETTER ------------------------
+                    string ExceptionLetterPath = "/Documentation/" + investments.Exception_Letter;
+                    if (investments.Exception_Letter == null)
+                    {
+                        <td>N/A</td>
+                    }
+                    else
+                    {
+                        <td><a style="cursor:pointer" href="@ExceptionLetterPath" target="_blank"><iframe src='@ExceptionLetterPath' style=" height:250px; width:250px ; border:hidden"></iframe><strong>Open</strong></a></td>
+                    }
+
+                    // ---------- ECCLS ------------------------
+                    string ECCLSPath = "/Documentation/" + investments.ECCLS;
+                    if (investments.ECCLS == null)
+                    {
+                        <td>N/A</td>
+                    }
+                    else
+                    {
+                        <td><a style="cursor:pointer" href="@ECCLSPath" target="_blank"><iframe src='@ECCLSPath' style=" height:250px; width:250px ; border:hidden"></iframe><strong>Open</strong></a></td>
+                    }
+
+                    // ---------- REBILL POSALES CONFIRMATION ------------------------
+                    string RebillPOsalesPath = "/Documentation/" + investments.RebillPOSalesConfirmation;
+                    if (investments.RebillPOSalesConfirmation == null)
+                    {
+                        <td>N/A</td>
+                    }
+                    else
+                    {
+                        <td><a style="cursor:pointer" href="@RebillPOsalesPath" target="_blank"><iframe src='@RebillPOsalesPath' style=" height:250px; width:250px ; border:hidden"></iframe><strong>Open</strong></a></td>
+                    }
+
+                    // ---------- OTHERS ------------------------
+                    string OthersPath = "/Documentation/" + investments.Others;
+                    if (investments.Others == null)
+                    {
+                        <td>N/A</td>
+                    }
+                    else
+                    {
+                        <td><a style="cursor:pointer" href="@OthersPath" target="_blank"><iframe src='@OthersPath' style=" height:250px; width:250px ; border:hidden"></iframe><strong>Open</strong></a></td>
+                    }
+
+                    // ---------- OTHERS MAC ------------------------
+                    string OthersMAC = "/Documentation/" + investments.Others_MAC;
+                    if (investments.Others_MAC == null)
+                    {
+                        <td>N/A</td>
+                    }
+                    else
+                    {
+                        <td><a style="cursor:pointer" href="@OthersMAC" target="_blank"><iframe src='@OthersMAC' style=" height:250px; width:250px ; border:hidden"></iframe><strong>Open</strong></a></td>
+                    }
+
+                    // ---------- OTHERS CFI ------------------------
+                    string OthersCFI = "/Documentation/" + investments.Others_CFI;
+                    if (investments.Others_CFI == null)
+                    {
+                        <td>N/A</td>
+                    }
+                    else
+                    {
+                        <td><a style="cursor:pointer" href="@OthersCFI" target="_blank"><iframe src='@OthersCFI' style=" height:250px; width:250px ; border:hidden"></iframe><strong>Open</strong></a></td>
+                    }
+
+                    // ---------- RELEASE DOCUMENT ------------------------
+                    string releasedpath = "/Documentation/" + investments.ReleasedDocument;
+                    if (investments.ReleasedDocument == null)
+                    {
+                        <td>N/A</td>
+                    }
+                    else
+                    {
+                        <td><a style="cursor:pointer" href="@releasedpath" target="_blank"><iframe src='@releasedpath' style=" height:250px; width:250px ; border:hidden"></iframe><strong>Open</strong></a></td>
+                    }
+
+                    // ---------- HISTORY PDF ------------------------
+                    string historypath = "/Documentation/" + investments.HistoryPDF;
+                    if (investments.HistoryPDF == null)
+                    {
+                        <td>N/A</td>
+                    }
+                    else
+                    {
+                        <td><a style="cursor:pointer" href="@historypath" target="_blank"><iframe src='@historypath' style=" height:250px; width:250px ; border:hidden"></iframe><strong>Open</strong></a></td>
+                    }
+                }
+            </tr>
+        </tbody>
+    </table>
+
+    @{
+        // Nao é necessários comentários para os investments que ja estiverem em estado de release
+        if (investments.StatusId != 5 & !isRequestor & currentUser.RoleId == investments.ProcessLevelId)
+        {
+            <EditForm Model="investments">
+                <label>Comment:</label>
+                <InputText @bind-Value="approverscommentstextbox" style="width:1000px ;height:100px">@investments.Comments</InputText>
+            </EditForm>
+        }
+
+        if (investments.StatusId == 5 & currentUser.RoleId == 15)
+        {
+            <EditForm Model="investments">
+                <label>Comment:</label>
+                <InputText @bind-Value="approverscommentstextbox" style="width:1000px ;height:100px">@investments.Comments</InputText>
+            </EditForm>
+        }
+    }
+    <br />
+    @if (investments.ProcessLevelId == 15 & investments.StatusId == 2)
+    {
+        <EditForm Model="@investments">
+            <label>Reg Number:</label>
+            <InputText class="form-control" @bind-Value="investments.RegNumber" style="width:200px ;height:25px" />
+        </EditForm>
+    }
+
+    <br />
+
+    @{
+        if (!currentUrl.Contains("AllInvestments") && investments.StatusId != 1 && !currentUrl.Contains("GlobalInvestments"))
+        {
+            if (IsDisabled == false)
+            {
+                <Button class="btn btn-outline-success" disabled="@IsDisabled" @onclick="() => Approve(investments)">
+                    Approve
+                </Button>
+            }
+            <a class="btn btn-outline-danger" role="button" @onclick="() => RejectCorrect(investments,1)">
+                Reject
+            </a>
+            <a style="margin-left:180px" class="btn btn-outline-info" role="button" @onclick="() => RejectCorrect(investments,2)">
+                Correct
+            </a>
+        }
+
+        if (currentUser.RoleId == 15 && investments.StatusId == 5)
+        {
+            <a class="btn btn-outline-danger" role="button" @onclick="() => RejectCorrect(investments,1)">
+                Reject
+            </a>
+        }
+
+        if (investments.StatusId == 1 && !currentUrl.Contains("AllInvestments") || investments.ProcessLevelId == 2)
+        {
+            <a class="btn btn-outline-success" role="button" @onclick="() => SendforApproval(investments)">
+                Send for Approval
+            </a>
+        }
+
+        if (investments.ProcessLevelId == 15 & investments.StatusId != 4 & investments.StatusId != 3 & investments.StatusId != 5 & investments.ProcessLevelId == 15)
+        {
+            <InputFile OnChange="InsertFile" />
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string NetId { get; set; }
+    [Parameter]
+    public int Id { get; set; }
+    protected Investments investments = new();
+    protected List<Investments> investmentsList = new();
+    private bool isRequestor { get { return currentUser.RoleId.Equals(2); } }
+    private bool isadmin { get { return currentUser.RoleId.Equals(1); } }
+    protected User currentUser { get; set; }
+    protected User approver { get; set; }
+    protected User requester { get; set; }
+    protected User admin { get; set; }
+    protected User approver9 { get; set; }
+    protected User approver12 { get; set; }
+    protected List<User> userList = new();
+    protected InvestmentsHistory investmentshistory = new InvestmentsHistory();
+    public string toCC { get; set; }
+    public Investments investmentcomment = new Investments();
+    public string comment { get; set; }
+    protected List<string> emailList = new List<string>();
+    protected List<string> investmentpdf = new List<string>();
+    protected Comment approvercomment = new Comment();
+    protected string approverscommentstextbox { get; set; }
+    public string approveremailcomment { get; set; }
+    public string folder { get; set; }
+    public string fileName { get; set; }
+    public string investmentreleased { get; set; }
+    private long maxFileSize = 2048 * 2048;
+    private int maxAllowedFiles = 3;
+    private string historyPath { get; set; }
+    private string investmentformreleased { get; set; }
+    private string user { get; set; }
+    private string investmentformreleasedfile { get; set; }
+    private string releasedocumentpath { get; set; }
+    protected List<string> aprover7list = new List<string>();
+    protected string regNumber { get; set; }
+    private string oldname { get; set; }
+    protected List<User> requestersList = new();
+    protected List<string> requesterList = new();
+    protected List<string> approversList = new();
+    List<User> otherme = new List<User>();
+    protected bool IsDisabled { get; set; }
+    protected string currentUrl;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Disable the button when clicked
+        IsDisabled = false;
+
+        // tras o investment pelo ID para o popup
+        investments = await investmentServices.GetById(Id);
+
+        // tras o current user
+        currentUser = await userService.GetbyNetId(NetId);
+
+        // tras o requester que estiver loggado
+        requester = await userService.GetbyId(investments.RequesterId);
+
+        // Get comment from database
+        investmentcomment = await investmentServices.GetById(Id);
+
+        //tras o investment history
+        investmentshistory = await investmenthistoryService.GetInvestmentHistoryByInvestmentId(investments.Id);
+
+        //tras o comment
+        approvercomment = await commentService.GetCommentByInvestmentId(investments.Id);
+
+        otherme = await userService.GetUserByNetIdList(currentUser.NetId);
+
+        currentUrl = navigationManager.Uri;
+    }
+
+    // O investment inicia o processo de aprovacao passando ao proximo approver
+    protected async Task Approve(Investments investments)
+    {
+        // Disable the button when clicked
+        IsDisabled = true;
+
+        _context.Entry(currentUser).Reference(_currentuser => _currentuser.Role).Load();
+
+        switch (investments.ProcessLevelId)
+        {
+            case 3: // PLANT ME MANAGER
+
+                approvercomment.Approver3 = currentUser.Name; // Nome do aprovador na tabela dos comentários
+                approvercomment.Approver3Comment = approverscommentstextbox; // Nome do aprovador na tabela dos comentários
+                investmentshistory.Approval3 = currentUser.Name; // o nome do aprovador para o ficheiro histórico
+                                                                 // investmentshistory.Approval3role = currentUser.Role.Description; // o role do aprovador para o ficheiro histórico
+                investmentshistory.Approval3role = "Plant ME"; // o role do aprovador para o ficheiro histórico
+                investmentshistory.ProcesslevelDate3 = DateTime.Now; // a data em que aprovou
+                investments.Approver3hasReviewed = true; // confirmar a aprovacao do aprovador
+
+                do
+                {
+                    investments.ProcessLevelId += 1;
+
+                    if (investments.ProcessLevelId > 6)
+                    {
+                        // Search for Approvers of MEC and after
+                        userList = await userService.GetLevelByIdList(investments.ProcessLevelId);
+                    }
+                    else
+                    {
+                        // Search for Approvers by plant
+                        userList = await userService.GetUserByLevelAndPlantList(investments.ProcessLevelId, investments.PlantId);
+                    }
+                } while (userList.Count == 0);
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                // Email sending
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                foreach (var user in userList)
+                {
+                    string email = user.Email;
+                    approversList.Add(email);
+                }
+
+                try
+                {
+                    await MailService.SentPartiallyApprovedList(approversList, requesterList, investments);
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was approved and sent to the next approver but the next approver is not going to receive the email notification!");
+                }
+
+                break;
+
+            case 4: // CLUSTER ME MANAGER
+
+                approvercomment.Approver4 = currentUser.Name;
+                approvercomment.Approver4Comment = approverscommentstextbox;
+                investmentshistory.Approval4 = currentUser.Name;
+                // investmentshistory.Approval4role = currentUser.Role.Description;
+                investmentshistory.Approval4role = "Cluster ME";
+                investmentshistory.ProcesslevelDate4 = DateTime.Now;
+                investments.Approver4hasReviewed = true;
+
+                do
+                {
+                    investments.ProcessLevelId += 1;
+
+                    if (investments.ProcessLevelId > 6)
+                    {
+                        // Search for Approvers of MEC and after
+                        userList = await userService.GetLevelByIdList(investments.ProcessLevelId);
+                    }
+                    else
+                    {
+                        // Search for Approvers by plant
+                        userList = await userService.GetUserByLevelAndPlantList(investments.ProcessLevelId, investments.PlantId);
+                    }
+                } while (userList.Count == 0);
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                // Email sending
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                foreach (var user in userList)
+                {
+                    string email = user.Email;
+                    approversList.Add(email);
+                }
+
+                try
+                {
+                    await MailService.SentPartiallyApprovedList(approversList, requesterList, investments);
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was approved and sent to the next approver but the next approver is not going to receive the email notification!");
+                }
+
+                break;
+
+            case 5: // PLANT FINANCE
+
+                approvercomment.Approver5 = currentUser.Name;
+                approvercomment.Approver5Comment = approverscommentstextbox;
+                investmentshistory.Approval5 = currentUser.Name;
+                // investmentshistory.Approval5role = currentUser.Role.Description;
+                investmentshistory.Approval5role = "Plant Finance";
+                investmentshistory.ProcesslevelDate5 = DateTime.Now;
+                investments.Approver5hasReviewed = true;
+
+                // Plant general management only approves in Morocco, Serbia, Ukraine and Romania if the document type is Small IR < 10K
+                if ((investments.CountryId == 2 || investments.CountryId == 3 || investments.CountryId == 5 || investments.CountryId == 6) && investments.DocTypeId == 2)
+                {
+                    do
+                    {
+                        investments.ProcessLevelId += 1;
+
+                        if (investments.ProcessLevelId > 6)
+                        {
+                            // Search for Approvers of MEC and after
+                            userList = await userService.GetLevelByIdList(investments.ProcessLevelId);
+                        }
+                        else
+                        {
+                            // Search for Approvers by plant
+                            userList = await userService.GetUserByLevelAndPlantList(investments.ProcessLevelId, investments.PlantId);
+                        }
+                    } while (userList.Count == 0);
+                }
+                else
+                {
+
+                    investments.ProcessLevelId = 7;
+
+                    // Search for Approvers of MEC and after
+                    userList = await userService.GetLevelByIdList(investments.ProcessLevelId);
+
+                }
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                // Email sending
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                foreach (var user in userList)
+                {
+                    string email = user.Email;
+                    approversList.Add(email);
+                }
+
+                try
+                {
+                    await MailService.SentPartiallyApprovedList(approversList, requesterList, investments);
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was approved and sent to the next approver but the next approver is not going to receive the email notification!");
+                }
+
+                break;
+
+            case 6: // PLANT GENERAL MANAGEMENT
+
+                approvercomment.Approver6 = currentUser.Name;
+                approvercomment.Approver6Comment = approverscommentstextbox;
+                investmentshistory.Approval6 = currentUser.Name;
+                // investmentshistory.Approval6role = currentUser.Role.Description;
+                investmentshistory.Approval6role = "Plant General Management";
+                investmentshistory.ProcesslevelDate6 = DateTime.Now;
+                investments.Approver6hasReviewed = true;
+
+                do
+                {
+                    investments.ProcessLevelId += 1;
+
+                    if (investments.ProcessLevelId > 6)
+                    {
+                        // Search for Approvers of MEC and after
+                        userList = await userService.GetLevelByIdList(investments.ProcessLevelId);
+                    }
+                    else
+                    {
+                        // Search for Approvers by plant
+                        userList = await userService.GetUserByLevelAndPlantList(investments.ProcessLevelId, investments.PlantId);
+                    }
+                } while (userList.Count == 0);
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                // Email sending
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                foreach (var user in userList)
+                {
+                    string email = user.Email;
+                    approversList.Add(email);
+                }
+
+                try
+                {
+                    await MailService.SentPartiallyApprovedList(approversList, requesterList, investments);
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was approved and sent to the next approver but the next approver is not going to receive the email notification!");
+                }
+
+                break;
+
+            case 7: // MEC CAPITAL TEAM
+
+                approvercomment.Approver7 = currentUser.Name;
+                approvercomment.Approver7Comment = approverscommentstextbox;
+                investmentshistory.Approval7 = currentUser.Name;
+                // investmentshistory.Approval7role = currentUser.Role.Description;
+                investmentshistory.Approval7role = "MEC Capital Team";
+                investmentshistory.ProcesslevelDate7 = DateTime.Now;
+                investments.Approver7hasReviewed = true;
+
+                // Carregar o aprovador de nivel 8 (program manager) escolhido na textbox APENAS SE O PROJECT TYPE FOR PP
+                if (investments.ProjectTypeId == 1)
+                {
+                    investments.ProcessLevelId += 1;
+                    approver = await userService.GetbyId(investments.ProgramManagerId.Value);
+                }
+                else
+                {
+                    investments.ProcessLevelId += 2;
+                    approver = await userService.GetUserByLevel(investments.ProcessLevelId);
+                }
+                List<User> approver7list = new List<User>();
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    requesterList.Add(seven);
+                }
+
+                // Send email
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                emailList.Add(approver.Email);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                try
+                {
+                    await MailService.SentPartiallyApprovedList(emailList, requesterList, investments);
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was approved and sent to the next approver but the next approver is not going to receive the email notification!");
+                }
+
+                break;
+
+            case 8: // PROGRAM MANAGER
+
+                approvercomment.Approver8 = currentUser.Name;
+                approvercomment.Approver8Comment = approverscommentstextbox;
+                investmentshistory.Approval8 = currentUser.Name;
+                // investmentshistory.Approval8role = currentUser.Role.Description;
+                investmentshistory.Approval8role = "Program Manager";
+                investmentshistory.ProcesslevelDate8 = DateTime.Now;
+                investments.Approver8hasReviewed = true;
+
+                investments.ProcessLevelId += 1;
+
+                approver = await userService.GetUserByLevel(investments.ProcessLevelId);
+
+                // Sent Email
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    requesterList.Add(seven);
+                }
+
+                //requestersList = await userService.GetUserByLevelAndCountryList(2, investments.CountryId);
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                emailList.Add(approver.Email);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                try
+                {
+                    await MailService.SentPartiallyApprovedList(emailList, requesterList, investments);
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was approved and sent to the next approver but the next approver is not going to receive the email notification!");
+                }
+
+                break;
+
+            case 9: // CAPITAL MANAGER
+
+                approvercomment.Approver9 = currentUser.Name;
+                approvercomment.Approver9Comment = approverscommentstextbox;
+                investmentshistory.Approval9 = currentUser.Name;
+                // investmentshistory.Approval9role = currentUser.Role.Description;
+                investmentshistory.Approval9role = "Capital Manager";
+                investmentshistory.ProcesslevelDate9 = DateTime.Now;
+                investments.Approver9hasReviewed = true;
+
+                investments.ProcessLevelId += 1;
+
+                approver = await userService.GetUserByLevel(investments.ProcessLevelId);
+
+                //Sent email
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    requesterList.Add(seven);
+                }
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                emailList.Add(approver.Email);
+                approver9 = await userService.GetUserByLevel(9);
+                requesterList.Add(approver9.Email);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                try
+                {
+                    await MailService.SentPartiallyApprovedList(emailList, requesterList, investments);
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was approved and sent to the next approver but the next approver is not going to receive the email notification!");
+                }
+
+                break;
+
+            case 10: // ADVANCE MANAGER
+
+                approvercomment.Approver10 = currentUser.Name;
+                approvercomment.Approver10Comment = approverscommentstextbox;
+                investmentshistory.Approval10 = currentUser.Name;
+                // investmentshistory.Approval10role = currentUser.Role.Description;
+                investmentshistory.Approval10role = "Advance Manager";
+                investmentshistory.ProcesslevelDate10 = DateTime.Now;
+                investments.Approver10hasReviewed = true;
+
+                investments.ProcessLevelId += 1;
+                approver = await userService.GetUserByLevel(investments.ProcessLevelId);
+
+                //Sent email
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    requesterList.Add(seven);
+                }
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                emailList.Add(approver.Email);
+                approver9 = await userService.GetUserByLevel(9);
+                requesterList.Add(approver9.Email);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                try
+                {
+                    await MailService.SentPartiallyApprovedList(emailList, requesterList, investments);
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was approved and sent to the next approver but the next approver is not going to receive the email notification!");
+                }
+
+                break;
+
+            case 11: // ME DIRECTOR
+
+                approvercomment.Approver11 = currentUser.Name;
+                approvercomment.Approver11Comment = approverscommentstextbox;
+                investmentshistory.Approval11 = currentUser.Name;
+                // investmentshistory.Approval11role = currentUser.Role.Description;
+                investmentshistory.Approval11role = "ME Director";
+                investmentshistory.ProcesslevelDate11 = DateTime.Now;
+                investments.Approver11hasReviewed = true;
+
+                investments.ProcessLevelId += 1;
+                approver = await userService.GetUserByLevel(investments.ProcessLevelId);
+
+                //Sent email
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    requesterList.Add(seven);
+                }
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                emailList.Add(approver.Email);
+                approver9 = await userService.GetUserByLevel(9);
+                requesterList.Add(approver9.Email);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                try
+                {
+                    await MailService.SentPartiallyApprovedList(emailList, requesterList, investments);
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was approved and sent to the next approver but the next approver is not going to receive the email notification!");
+                }
+
+                break;
+
+            case 12: // KRAKOW FINANCE LEADER
+
+                approvercomment.Approver12 = currentUser.Name;
+                approvercomment.Approver12Comment = approverscommentstextbox;
+                investmentshistory.Approval12 = currentUser.Name;
+                // investmentshistory.Approval12role = currentUser.Role.Description;
+                investmentshistory.Approval12role = "Krakow Finance Leader";
+                investmentshistory.ProcesslevelDate12 = DateTime.Now;
+                investments.Approver12hasReviewed = true;
+
+                if (investments.DocTypeId == 1 | investments.DocTypeId == 3 | investments.DocTypeId == 5 | investments.DocTypeId == 7 | investments.DocTypeId == 9)
+                {
+                    investments.ProcessLevelId += 3; // o investment passa para 15
+                }
+                else
+                {
+                    investments.ProcessLevelId += 1;
+                }
+
+                approver = await userService.GetUserByLevel(investments.ProcessLevelId);
+
+                //Sent email
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    requesterList.Add(seven);
+                }
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                emailList.Add(approver.Email);
+                approver9 = await userService.GetUserByLevel(9);
+                requesterList.Add(approver9.Email);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                try
+                {
+                    await MailService.SentPartiallyApprovedList(emailList, requesterList, investments);
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was approved and sent to the next approver but the next approver is not going to receive the email notification!");
+                }
+
+                break;
+
+            case 13: // REGIONAL PBU FINANCE DIRECTOR
+
+                approvercomment.Approver13 = currentUser.Name;
+                approvercomment.Approver13Comment = approverscommentstextbox;
+                investmentshistory.Approval13 = currentUser.Name;
+                // investmentshistory.Approval13role = currentUser.Role.Description;
+                investmentshistory.Approval13role = "Regional PBU Finance Director";
+                investmentshistory.ProcesslevelDate13 = DateTime.Now;
+                investments.Approver13hasReviewed = true;
+
+                investments.ProcessLevelId += 1;
+                approver = await userService.GetUserByLevel(investments.ProcessLevelId);
+
+                //Sent email
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    requesterList.Add(seven);
+                }
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                emailList.Add(approver.Email);
+                approver9 = await userService.GetUserByLevel(9);
+                requesterList.Add(approver9.Email);
+                approver12 = await userService.GetUserByLevel(12);
+                requesterList.Add(approver12.Email);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                try
+                {
+                    await MailService.SentPartiallyApprovedList(emailList, requesterList, investments);
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was approved and sent to the next approver but the next approver is not going to receive the email notification!");
+                }
+
+                break;
+
+            case 14: // REGIONAL PBU MANAGING DIRECTOR
+
+                approvercomment.Approver14 = currentUser.Name;
+                approvercomment.Approver14Comment = approverscommentstextbox;
+                investmentshistory.Approval14 = currentUser.Name;
+                // investmentshistory.Approval14role = currentUser.Role.Description;
+                investmentshistory.Approval14role = "Regional PBU Managing Director";
+                investmentshistory.ProcesslevelDate14 = DateTime.Now;
+                investments.Approver14hasReviewed = true;
+
+                investments.ProcessLevelId += 1;
+                approver = await userService.GetUserByLevel(investments.ProcessLevelId);
+
+                //Sent email
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    requesterList.Add(seven);
+                }
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                emailList.Add(approver.Email);
+                approver9 = await userService.GetUserByLevel(9);
+                requesterList.Add(approver9.Email);
+                approver12 = await userService.GetUserByLevel(12);
+                requesterList.Add(approver12.Email);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                try
+                {
+                    await MailService.SentPartiallyApprovedList(emailList, requesterList, investments);
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was approved and sent to the next approver but the next approver is not going to receive the email notification!");
+                }
+
+                break;
+
+            case 15: // KRAKOW FINANCE TEAM
+
+                approvercomment.Approver15 = currentUser.Name;
+                approvercomment.Approver15Comment = approverscommentstextbox;
+                investmentshistory.Approval15 = currentUser.Name;
+                // investmentshistory.Approval15role = currentUser.Role.Description;
+                investmentshistory.Approval15role = "Krakow Finance Team";
+                investmentshistory.ProcesslevelDate15 = DateTime.Now;
+                investments.Approver15hasReviewed = true;
+
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    emailList.Add(seven);
+                }
+                approver9 = await userService.GetUserByLevel(9);
+                approver12 = await userService.GetUserByLevel(12);
+                User approver15 = await userService.GetUserByLevel(15);
+
+                emailList.Add(approver9.Email);
+                emailList.Add(approver12.Email);
+                emailList.Add(approver15.Email);
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                if (investments.IR_DRNumber.Contains("obi") || investments.IR_DRNumber.Contains("Obi") || investments.IR_DRNumber.Contains("OBI"))
+                {
+                    investments.RegNumber = investments.ProjectTitle_DisposalDescription;
+                }
+
+                //Change the name of the release document file so it includes the regnumber
+                if (investments.ReleasedDocument != null)
+                {
+#if DEBUG
+    string newname = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.RegNumber + ".pdf";
+    oldname = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.ReleasedDocument;
+#elif RELEASE
+    string newname = @"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.RegNumber + ".pdf";
+    oldname = @"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.ReleasedDocument;
+#else
+                    string newname = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.RegNumber + ".pdf";
+                    oldname = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.ReleasedDocument;
+#endif
+
+                    File.Move(oldname, newname, true);
+
+
+#if DEBUG
+    if (!File.Exists(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + oldname))
+    {
+    investments.ReleasedDocument = investments.RegNumber + ".pdf";
+    await investmentServices.Update(investments);
+    }
+#elif RELEASE
+    if (!File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + oldname))
+    {
+    investments.ReleasedDocument = investments.RegNumber + ".pdf";
+    await investmentServices.Update(investments);
+    }
+#else
+                    if (!File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + oldname))
+                    {
+                        investments.ReleasedDocument = investments.RegNumber + ".pdf";
+                        await investmentServices.Update(investments);
+                    }
+#endif
+
+                    // Anexar release document ao email
+#if DEBUG
+    string releasedoc = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.ReleasedDocument;
+#elif RELEASE
+    string releasedoc = @"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.ReleasedDocument;
+#else
+                    string releasedoc = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.ReleasedDocument;
+#endif
+
+                    investmentpdf.Add(releasedoc);
+                }
+
+                // O investment passa a released
+                investments.StatusId = 5;
+
+                // CHAMAR HISTORIC DOCUMENT SERVICE
+                historyPath = historicdocumentService.CreateHistoricDocument(investments, investmentshistory);
+
+                //Anexa no email
+                investmentpdf.Add(historyPath);
+
+                string fileName = "Historic_Of_Approvers_" + investments.RegNumber + ".pdf";
+
+                investments.HistoryPDF = fileName;
+
+                // If PM exists had to emailList
+                if (investments.ProgramManagerId != null)
+                {
+                    User programManager = await userService.GetbyId(investments.ProgramManagerId.Value);
+                    emailList.Add(programManager.Email);
+                }
+
+                try
+                {
+                    await MailService.SentReleaseList(requesterList, emailList, investmentpdf, investments);
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was released but the email notification was not sent!");
+                }
+
+                await investmentServices.Update(investments);
+                break;
+        }
+
+        System.GC.Collect();
+        System.GC.WaitForPendingFinalizers();
+
+        investmentpdf.Clear();
+
+        // para atualizar o investment
+        await investmentServices.Update(investments);
+
+        // para atualizar o comment
+        await commentService.Update(approvercomment);
+
+        // para atualizar o history
+        await investmenthistoryService.Update(investmentshistory);
+
+        _navigationManager.NavigateTo("/", forceLoad: true);
+
+    }
+
+    // O investment é rejeitado por um approver e fica com estado rejeitado
+    protected async Task RejectCorrect(Investments investments, int rejectorcorrect)
+    {
+        // THE COMMENT TEXT MUST BE WRITTEN / CHANGED
+        if (String.IsNullOrEmpty(approverscommentstextbox))
+        {
+            if(rejectorcorrect == 1)
+            {
+               await JsRuntime.InvokeVoidAsync("alert", "Please fill the text box with a reason for the rejection");
+            }
+            else
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "Please fill the text box with a reason for the correction request");
+            }
+        
+            _navigationManager.NavigateTo("/");
+            return;
+        }
+
+        _context.Entry(currentUser).Reference(_currentuser => _currentuser.Role).Load();
+
+        switch (investments.ProcessLevelId)
+        {
+            case 3: // PLANT ME MANAGER
+
+                approvercomment.Approver3 = currentUser.Name; // Nome do aprovador na tabela dos comentários
+                approvercomment.Approver3Comment = approverscommentstextbox; // Nome do aprovador na tabela dos comentários
+                investments.Approver3hasReviewed = true; // confirmar a aprovacao do aprovador
+                approveremailcomment = approvercomment.Approver3Comment; // comentário da rejeição vai no email
+
+                investmentshistory.Approval3 = currentUser.Name;
+                investmentshistory.Approval3role = "Plant ME";
+                investmentshistory.ProcesslevelDate3 = DateTime.Now;
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                emailList.Add(currentUser.Email);
+
+                try
+                {
+                    // Approver has rejected
+                    if (rejectorcorrect == 1)
+                    {
+                        await MailService.SentForRejectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                    else // Approver has requested correction
+                    {
+                        await MailService.SentForCorrectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was rejected/sent for correction but the email notification was not sent!");
+                }
+
+                break;
+
+            case 4: // CLUSTER ME MANAGER
+
+                approvercomment.Approver4 = currentUser.Name;
+                approvercomment.Approver4Comment = approverscommentstextbox;
+                investments.Approver4hasReviewed = true;
+                approveremailcomment = approvercomment.Approver4Comment;
+
+                investmentshistory.Approval4 = currentUser.Name;
+                investmentshistory.Approval4role = "Cluster ME";
+                investmentshistory.ProcesslevelDate4 = DateTime.Now;
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                emailList.Add(currentUser.Email);
+
+                try
+                {
+                    // Approver has rejected
+                    if (rejectorcorrect == 1)
+                    {
+                        await MailService.SentForRejectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                    else // Approver has requested correction
+                    {
+                        await MailService.SentForCorrectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was rejected/sent for correction but the email notification was not sent!");
+                }
+
+                break;
+
+            case 5: // PLANT FINANCE
+
+                approvercomment.Approver5 = currentUser.Name;
+                approvercomment.Approver5Comment = approverscommentstextbox;
+                investments.Approver5hasReviewed = true;
+                approveremailcomment = approvercomment.Approver5Comment;
+
+                investmentshistory.Approval5 = currentUser.Name;
+                investmentshistory.Approval5role = "Plant Finance";
+                investmentshistory.ProcesslevelDate5 = DateTime.Now;
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                emailList.Add(currentUser.Email);
+
+                try
+                {
+                    // Approver has rejected
+                    if (rejectorcorrect == 1)
+                    {
+                        await MailService.SentForRejectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                    else // Approver has requested correction
+                    {
+                        await MailService.SentForCorrectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was rejected/sent for correction but the email notification was not sent!");
+                }
+
+                break;
+
+            case 6: // PLANT GENERAL MANAGEMENT
+
+                approvercomment.Approver6 = currentUser.Name;
+                approvercomment.Approver6Comment = approverscommentstextbox;
+                investments.Approver6hasReviewed = true;
+                approveremailcomment = approvercomment.Approver6Comment;
+
+                investmentshistory.Approval6 = currentUser.Name;
+                investmentshistory.Approval6role = "Plant General Management";
+                investmentshistory.ProcesslevelDate6 = DateTime.Now;
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                emailList.Add(currentUser.Email);
+
+                try
+                {
+                    // Approver has rejected
+                    if (rejectorcorrect == 1)
+                    {
+                        await MailService.SentForRejectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                    else // Approver has requested correction
+                    {
+                        await MailService.SentForCorrectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was rejected/sent for correction but the email notification was not sent!");
+                }
+
+                break;
+
+            case 7: // MEC CAPITAL TEAM
+
+                approvercomment.Approver7 = currentUser.Name;
+                approvercomment.Approver7Comment = approverscommentstextbox;
+                investments.Approver7hasReviewed = true;
+                approveremailcomment = approvercomment.Approver7Comment;
+
+                investmentshistory.Approval7 = currentUser.Name;
+                investmentshistory.Approval7role = "MEC Capital team";
+                investmentshistory.ProcesslevelDate7 = DateTime.Now;
+
+                List<User> approver7list = new List<User>();
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    emailList.Add(seven);
+                }
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                emailList.Add(currentUser.Email);
+
+                try
+                {
+                    // Approver has rejected
+                    if (rejectorcorrect == 1)
+                    {
+                        await MailService.SentForRejectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                    else // Approver has requested correction
+                    {
+                        await MailService.SentForCorrectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was rejected/sent for correction but the email notification was not sent!");
+                }
+
+                break;
+
+            case 8: // PROGRAM MANAGER
+
+                approvercomment.Approver8 = currentUser.Name;
+                approvercomment.Approver8Comment = approverscommentstextbox;
+                investments.Approver8hasReviewed = true;
+                approveremailcomment = approvercomment.Approver8Comment;
+
+                investmentshistory.Approval8 = currentUser.Name;
+                investmentshistory.Approval8role = "Program Manager";
+                investmentshistory.ProcesslevelDate8 = DateTime.Now;
+
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    emailList.Add(seven);
+                }
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                emailList.Add(currentUser.Email);
+
+                try
+                {
+                    // Approver has rejected
+                    if (rejectorcorrect == 1)
+                    {
+                        await MailService.SentForRejectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                    else // Approver has requested correction
+                    {
+                        await MailService.SentForCorrectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was rejected/sent for correction but the email notification was not sent!");
+                }
+
+                break;
+
+            case 9: // CAPITAL MANAGER
+
+                approvercomment.Approver9 = currentUser.Name;
+                approvercomment.Approver9Comment = approverscommentstextbox;
+                investments.Approver9hasReviewed = true;
+                approveremailcomment = approvercomment.Approver9Comment;
+
+                investmentshistory.Approval9 = currentUser.Name;
+                investmentshistory.Approval9role = "Capital Manager";
+                investmentshistory.ProcesslevelDate9 = DateTime.Now;
+
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    emailList.Add(seven);
+                }
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                emailList.Add(currentUser.Email);
+
+                try
+                {
+                    // Approver has rejected
+                    if (rejectorcorrect == 1)
+                    {
+                        await MailService.SentForRejectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                    else // Approver has requested correction
+                    {
+                        await MailService.SentForCorrectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was rejected/sent for correction but the email notification was not sent!");
+                }
+
+                break;
+
+            case 10: // ADVANCE MANAGER
+
+                approvercomment.Approver10 = currentUser.Name;
+                approvercomment.Approver10Comment = approverscommentstextbox;
+                investments.Approver10hasReviewed = true;
+                approveremailcomment = approvercomment.Approver10Comment;
+
+                investmentshistory.Approval10 = currentUser.Name;
+                investmentshistory.Approval10role = "Advance Manager";
+                investmentshistory.ProcesslevelDate10 = DateTime.Now;
+
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    emailList.Add(seven);
+                }
+
+                User approver9 = await userService.GetUserByLevel(9);
+                emailList.Add(approver9.Email);
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                emailList.Add(currentUser.Email);
+
+                try
+                {
+                    // Approver has rejected
+                    if (rejectorcorrect == 1)
+                    {
+                        await MailService.SentForRejectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                    else // Approver has requested correction
+                    {
+                        await MailService.SentForCorrectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was rejected/sent for correction but the email notification was not sent!");
+                }
+
+                break;
+
+            case 11: // ME DIRECTOR
+
+                approvercomment.Approver11 = currentUser.Name;
+                approvercomment.Approver11Comment = approverscommentstextbox;
+                investments.Approver11hasReviewed = true;
+                approveremailcomment = approvercomment.Approver11Comment;
+
+                investmentshistory.Approval11 = currentUser.Name;
+                investmentshistory.Approval11role = "ME Director";
+                investmentshistory.ProcesslevelDate11 = DateTime.Now;
+
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    emailList.Add(seven);
+                }
+
+                approver9 = await userService.GetUserByLevel(9);
+                emailList.Add(approver9.Email);
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                emailList.Add(currentUser.Email);
+
+                try
+                {
+                    // Approver has rejected
+                    if (rejectorcorrect == 1)
+                    {
+                        await MailService.SentForRejectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                    else // Approver has requested correction
+                    {
+                        await MailService.SentForCorrectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was rejected/sent for correction but the email notification was not sent!");
+                }
+
+                break;
+
+            case 12: // KRAKOW FINANCE LEADER
+
+                approvercomment.Approver12 = currentUser.Name;
+                approvercomment.Approver12Comment = approverscommentstextbox;
+                investments.Approver12hasReviewed = true;
+                approveremailcomment = approvercomment.Approver12Comment;
+
+                investmentshistory.Approval12 = currentUser.Name;
+                investmentshistory.Approval12role = "Krakow Finance Leader";
+                investmentshistory.ProcesslevelDate12 = DateTime.Now;
+
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    emailList.Add(seven);
+                }
+
+                approver9 = await userService.GetUserByLevel(9);
+                emailList.Add(approver9.Email);
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                emailList.Add(currentUser.Email);
+
+                try
+                {
+                    // Approver has rejected
+                    if (rejectorcorrect == 1)
+                    {
+                        await MailService.SentForRejectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                    else // Approver has requested correction
+                    {
+                        await MailService.SentForCorrectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was rejected/sent for correction but the email notification was not sent!");
+                }
+
+                break;
+
+            case 13: // REGIONAL PBU FINANCE DIRECTOR
+
+                approvercomment.Approver13 = currentUser.Name;
+                approvercomment.Approver13Comment = approverscommentstextbox;
+                investments.Approver13hasReviewed = true;
+                approveremailcomment = approvercomment.Approver13Comment;
+
+                investmentshistory.Approval13 = currentUser.Name;
+                investmentshistory.Approval13role = "Regional PBU Finance Director";
+                investmentshistory.ProcesslevelDate13 = DateTime.Now;
+
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    emailList.Add(seven);
+                }
+
+                approver9 = await userService.GetUserByLevel(9);
+                User approver12 = await userService.GetUserByLevel(12);
+                emailList.Add(approver9.Email);
+                emailList.Add(approver12.Email);
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                emailList.Add(currentUser.Email);
+
+                try
+                {
+                    // Approver has rejected
+                    if (rejectorcorrect == 1)
+                    {
+                        await MailService.SentForRejectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                    else // Approver has requested correction
+                    {
+                        await MailService.SentForCorrectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was rejected/sent for correction but the email notification was not sent!");
+                }
+
+                break;
+
+            case 14: // REGIONAL PBU MANAGING DIRECTOR
+
+                approvercomment.Approver14 = currentUser.Name;
+                approvercomment.Approver14Comment = approverscommentstextbox;
+                investments.Approver14hasReviewed = true;
+                approveremailcomment = approvercomment.Approver14Comment;
+
+                investmentshistory.Approval14 = currentUser.Name;
+                investmentshistory.Approval14role = "Regional PBU Managing Director";
+                investmentshistory.ProcesslevelDate14 = DateTime.Now;
+
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    emailList.Add(seven);
+                }
+
+                approver9 = await userService.GetUserByLevel(9);
+                approver12 = await userService.GetUserByLevel(12);
+                emailList.Add(approver9.Email);
+                emailList.Add(approver12.Email);
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                emailList.Add(currentUser.Email);
+
+                try
+                {
+                    // Approver has rejected
+                    if (rejectorcorrect == 1)
+                    {
+                        await MailService.SentForRejectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                    else // Approver has requested correction
+                    {
+                        await MailService.SentForCorrectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was rejected/sent for correction but the email notification was not sent!");
+                }
+
+                break;
+
+            case 15: // KRAKOW FINANCE TEAM
+
+                approvercomment.Approver15 = currentUser.Name;
+                approvercomment.Approver15Comment = approverscommentstextbox;
+                investments.Approver15hasReviewed = true;
+                approveremailcomment = approvercomment.Approver15Comment;
+
+                investmentshistory.Approval15 = currentUser.Name;
+                investmentshistory.Approval15role = "Krakow Finance Team";
+                investmentshistory.ProcesslevelDate15 = DateTime.Now;
+
+                approver7list = await userService.GetLevelByIdList(7);
+                foreach (var email7 in approver7list)
+                {
+                    string seven = email7.Email;
+                    emailList.Add(seven);
+                }
+
+                approver9 = await userService.GetUserByLevel(9);
+                approver12 = await userService.GetUserByLevel(12);
+                emailList.Add(approver9.Email);
+                emailList.Add(approver12.Email);
+
+                requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+                foreach (var requester in requestersList)
+                {
+                    string email = requester.Email;
+                    requesterList.Add(email);
+                }
+
+                emailList.Add(currentUser.Email);
+
+                try
+                {
+                    // Approver has rejected
+                    if (rejectorcorrect == 1)
+                    {
+                        await MailService.SentForRejectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                    else // Approver has requested correction
+                    {
+                        await MailService.SentForCorrectionList(requesterList, emailList, investments, approveremailcomment);
+                    }
+                }
+                catch (Exception)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The investment was rejected/sent for correction but the email notification was not sent!");
+                }
+
+                break;
+        }
+
+        // Approver has rejected
+        if(rejectorcorrect == 1)
+        {
+            // O estado do investment passa a rejected
+            investments.StatusId = 4;
+        }
+        else // Approver has requested correction
+        {
+            // O estado do investment passa a corrected
+            investments.StatusId = 3;
+        }
+
+        // o investment recua para o nivel 2 (requester)
+        investments.ProcessLevelId = 2;
+
+        // Guarda os comentário de cada approver
+        #region TextBox Comments Logic
+
+        //// Associa o investment á tabela de comentários
+        //approvercomment.InvestmentsId = Id;
+
+        if (approvercomment.Id != 0)
+        {
+            await commentService.Update(approvercomment);
+        }
+        else
+        {
+            await commentService.Create(approvercomment);
+        }
+
+        #endregion
+
+        // para atualizar o estado
+        await investmentServices.Update(investments);
+
+        _navigationManager.NavigateTo("/", forceLoad: true);
+    }
+
+    // When the investment is in created state and is sent for approval
+    protected async Task SendforApproval(Investments investments)
+    {
+
+        investments.ProcessLevelId = 2;
+
+        do
+        {
+            investments.ProcessLevelId += 1;
+
+            if (investments.ProcessLevelId > 6)
+            {
+                // Search for Approvers of MEC and after
+                userList = await userService.GetLevelByIdList(investments.ProcessLevelId);
+            }
+            else
+            {
+                // Search for Approvers by plant
+                userList = await userService.GetUserByLevelAndPlantList(investments.ProcessLevelId, investments.PlantId);
+            }
+        } while (userList.Count == 0);
+
+        foreach (var user in userList)
+        {
+            string email = user.Email;
+            approversList.Add(email);
+        }
+
+        requestersList = await userService.GetUserByLevelAndPlantList(2, investments.PlantId);
+
+        foreach (var requester in requestersList)
+        {
+            string email = requester.Email;
+            requesterList.Add(email);
+        }
+
+        try
+        {
+            // Email Service
+            await MailService.SentForApprovalList(approversList, requesterList, investments);
+        }
+        catch (Exception)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "The investment was sent for approval but the email notification for the approver was not sent!");
+        }
+
+        // O investment passa a pending approval
+        investments.StatusId = 2;
+
+        // para atualizar o estado
+        await investmentServices.Update(investments);
+
+        _navigationManager.NavigateTo("/", forceLoad: true);
+    }
+
+    // Na última etapa o krakow finance team anexa o release document
+    private async Task InsertFile(InputFileChangeEventArgs e)
+    {
+#if DEBUG
+    if (File.Exists(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.ReleasedDocument))
+    {
+    File.Delete(@"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + investments.ReleasedDocument);
+    }
+#elif RELEASE
+    if (File.Exists(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.ReleasedDocument))
+    {
+    File.Delete(@"E:\\xxxxxxx\xxxxxxx-Investments\" + investments.ReleasedDocument);
+    }
+#else
+        if (File.Exists(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.ReleasedDocument))
+        {
+            File.Delete(@"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + investments.ReleasedDocument);
+        }
+#endif
+        Guid g = Guid.NewGuid();
+
+        string name = g + ".pdf";
+
+        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        {
+#if DEBUG
+    var path = @"C:\Projetos\InvestmentApprovalTool\InvestmentApprovalTool\wwwroot\Documentation\" + name;
+#elif RELEASE
+
+    var path = @"E:\\xxxxxxx\xxxxxxx-Investments\" + name;
+#else
+            var path = @"\\xxxxxxx\xxxxxxx\InvestmentApprovalTool_test\wwwroot\Documentation\" + name;
+#endif
+            try
+            {
+                await using FileStream fs = new FileStream(path, FileMode.Create);
+
+                if (file.Size > 4194304)
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "The file must be smaller than 4MB!");
+                    return;
+                }
+
+                await file.OpenReadStream(maxFileSize).CopyToAsync(fs);
+                releasedocumentpath = name.ToString();
+                investments.ReleasedDocument = releasedocumentpath;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+    }
+
+    private async Task RegNumber(Investments investments)
+    {
+        regNumber = investments.RegNumber;
+
+        try
+        {
+            await investmentServices.Update(investments);
+        }
+        catch (Exception)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "There was an error updating the Reg.Number");
+            _navigationManager.NavigateTo("AddInvestments");
+            return;
+        }
+        finally
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "The Reg.Number was saved successfully");
+        }
+    }
+}

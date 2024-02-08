@@ -1,0 +1,117 @@
+﻿@page "/"
+@using InvestmentApprovalTool.Components
+
+
+
+<PageTitle>Investment Tool</PageTitle>
+
+<div class="row">
+
+    @if (isRequestor)
+    {
+        <div class="col-10"><h3>Pending Investments</h3></div>
+    }
+    else
+    {
+        <div class="col-10"><h3>Investments to Review</h3></div>
+    }
+</div>
+<br />
+
+@if (investmentsList.Count != 0)
+{
+    <InvestmentsTable investmentsList="@investmentsList" investments="investments"></InvestmentsTable>
+}
+else
+{
+    <div><h3>There are no investments</h3></div>
+}
+
+@code {
+    protected List<Data.Investments> investmentsList = new();
+    protected Data.Investments investments = new();
+    [CascadingParameter]
+    protected User? currentUser { get; set; }
+    private bool isRequestor { get { return currentUser.RoleId.Equals(2); } }
+    protected string? pending { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (currentUser.isActive == true)
+        {
+            if (currentUser.RoleId > 1 && currentUser.RoleId < 7)
+            {
+                if (currentUser.RoleId == 2)
+                {
+                    investmentsList = await investmentServices.GetAllPendingsByUserIdRequester(currentUser.CountryId.Value);
+                }
+                else
+                {
+                    List<User> otherme = new List<User>();
+                    otherme = await userService.GetUserByNetIdList(currentUser.NetId);
+
+                    foreach (var user in otherme)
+                    {
+                        // Need to see if all the users of that same user are from MEC to beyond (MEC to Krakow dont have plantid)
+                        if (user.CountryId != null)
+                        {
+                            List<Data.Investments> x = await investmentServices.GetAllPendingsByProcessLevelAndPlant(user.RoleId, user.PlantId.Value);
+                            foreach (var item in x)
+                            {
+                                investmentsList.Add(item);
+                            }
+                        }
+                        else
+                        {
+                            List<Data.Investments> x = await investmentServices.GetAllPendingsByUserId(user.Id, user.RoleId);
+                            foreach (var item in x)
+                            {
+                                investmentsList.Add(item);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (currentUser.RoleId == 8)
+                {
+                    investmentsList = await investmentServices.GetInvestmentsByPMId(currentUser.Id, 8);
+                }
+                else
+                {
+
+                    List<User> otherme = new List<User>();
+                    otherme = await userService.GetUserByNetIdList(currentUser.NetId);
+
+                    foreach (var user in otherme)
+                    {
+                        if (user.CountryId == null)
+                        {
+                            List<Data.Investments> x = await investmentServices.GetAllPendingsByUserId(user.Id, user.RoleId);
+                            foreach (var item in x)
+                            {
+                                investmentsList.Add(item);
+                            }
+                        }
+                        else
+                        {
+                            List<Data.Investments> x = await investmentServices.GetAllPendingsByProcessLevelAndPlant(user.RoleId, user.PlantId.Value);
+                            foreach (var item in x)
+                            {
+                                investmentsList.Add(item);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/NotAuthorized", true);
+        }
+
+
+    }
+}
+
